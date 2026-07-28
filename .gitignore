@@ -65,6 +65,16 @@ raw/
 *.csv
 *.txt
 
+# Office documents. A client deliverable is far likelier to arrive as a workbook
+# or a report document than as prose, and no text lane can read one — the content
+# guard can only hash-pin binaries, never inspect them. Extension rules only, and
+# no office document is tracked today, so this is not a retroactive change.
+*.xlsx
+*.xls
+*.docx
+*.doc
+*.pptx
+
 # Benchmark runner artifacts (per-run workdirs, logs, result JSON)
 benchmarks/xbow/results/
 benchmarks/cybench/results/
@@ -80,6 +90,9 @@ benchmarks/bountybench/results/
 !skills/**/reference/catalog/*.json
 # PCI SSS catalog build config (deterministic, auditable) — keep tracked
 !tools/pci-sss/*.json
+# Content-guard binary pins. MUST stay tracked: without this file the guard cannot
+# certify any binary and fails closed everywhere it runs, CI included.
+!scripts/content-guard-*.json
 # CERT-In Audit Metadata export — pinned vocabulary + intermediate-JSON schema are
 # committed source-of-truth assets the builder resolves at this path (fresh checkout / CI).
 !formats/certin-audit-metadata/enums.json
@@ -148,6 +161,16 @@ Desktop.ini
 *.pem
 *.p12
 *.pfx
+# VPN profiles (often carry an inline <key> block) and cert/key material an
+# engagement or a capture proxy produces. Extension rules only — a directory rule
+# on projects/pentest/ would untrack real content. scripts/check_client_data.py
+# fails the build if one of these is tracked or staged anyway.
+*.ovpn
+*.crt
+*.cer
+*.der
+*.key
+*.jks
 # Dated engagement output dirs must never sit outside an ignored engagement tree
 [0-9][0-9][0-9][0-9][0-9][0-9]_*/
 [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]_*/

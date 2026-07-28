@@ -12,6 +12,7 @@ const pe = read('pentest-engagement.js');
 const cl = read('coordinator-loop.js');
 const vf = read('validate-findings.js');
 const mr = read('merge-reports.js');
+const su = read('skill-update.js');
 const pv = readFileSync(join(wfDir, '..', '..', 'tools', 'provision_vantage.sh'), 'utf8');
 const ciYml = readFileSync(join(wfDir, '..', '..', '.github', 'workflows', 'pentest-workflow-tests.yml'), 'utf8');
 
@@ -199,6 +200,166 @@ ok(/deliverable_password: \{ type/.test(pe) && /protected_zip: \{ type/.test(pe)
 ok(/NEVER write the password VALUE into summary\.md/.test(pe), 'the runner is told to keep the password value out of the zipped summary');
 ok(/DELIVERABLE-PASSWORD\.txt/.test(pe), 'the password is surfaced via a root file excluded from the deliverable');
 ok(/python3 tools\/test_protect_deliverable\.py/.test(ciYml), 'CI runs the protect_deliverable test');
+
+// --- skill-update: the determinism contract -------------------------------
+// The whole point of converting the skill to a workflow is that no step can be
+// skipped and no LLM can decide the outcome. These assert exactly that.
+ok(/phase\('Intake'\)/.test(su) && /phase\('Verify'\)/.test(su), 'skill-update runs Intake and Verify');
+ok(su.indexOf("phase('Sweep')") > 0 && su.indexOf("phase('Sweep')") < su.indexOf("phase('Verify')"),
+   'the confidentiality Sweep runs BEFORE Verify');
+ok(su.indexOf("phase('Write')") < su.indexOf("phase('Sweep')"), 'Write precedes Sweep');
+ok(su.indexOf("phase('Judge')") < su.indexOf("phase('Route')"), 'Judge precedes Route');
+// The lint gate must be a DELTA gate: the tree carries pre-existing violations,
+// so an absolute clean-tree gate would block every run forever.
+ok(/skill_linter\.py --delta/.test(su) && /afterPayload\.regressed/.test(su),
+   'skill-update gates on the lint DELTA, not an absolute clean tree');
+ok(/--write-baseline/.test(su) && /stores the violation key set/.test(su),
+   'Intake stores a baseline key set rather than relaying the ~280 KB payload through an agent');
+ok(/baseline_ok/.test(su), 'a delta computed against a MISSING baseline fails closed');
+ok(/refusing to write without a delta baseline/.test(su), 'a missing baseline fails closed rather than writing blind');
+// Every decision is code, not an agent.
+ok(/promotionGate\(c, carry\.j, carry\.votes\)/.test(su), 'the promote/reject decision is made by promotionGate in pure JS');
+ok(/writeGate\(\{ \.\.\.a, target_path: target \}/.test(su), 'every authored block passes through writeGate before any write');
+ok(/skillUpdateGate\(\{/.test(su), 'the final COMPLETE/BLOCKED call is skillUpdateGate');
+// "Built in code" means no AGENT ever supplies the report: no schema exposes a
+// report_markdown field for one to fill. A JS template literal is still code.
+ok(/buildChangeReport\(/.test(su), 'the three-bucket report comes from buildChangeReport');
+ok(!/report_markdown: \{ type/.test(su),
+   'no agent schema exposes report_markdown — the report is never authored by an agent');
+// The confidentiality sweep is an independent veto that no agent can talk past.
+ok(/python3 scripts\/check_client_data\.py/.test(su), 'the Sweep phase runs the confidentiality guard');
+ok(/gate\.ok && !sweepClean/.test(su), 'a failed confidentiality sweep vetoes an otherwise-passing gate');
+ok(/Do NOT edit any file to make it pass/.test(su), 'the sweep runner is forbidden from fixing its own failure');
+// Role boundary + fail-closed agent calls.
+ok(/INVOKED_BY === 'coordinator'/.test(su), 'a coordinator invocation is blocked (orchestrator-only)');
+ok(!/verdict === 'clean'/.test(su), 'no code path lets an agent verdict clear a deterministic finding');
+ok((su.match(/\.catch\(\(\) =>/g) || []).length >= 5, 'every agent call fails closed via .catch');
+// Reverting must never destroy the operator's uncommitted work.
+ok(/!dirtyPaths\.has\(p\)/.test(su), 'revert skips paths that were already dirty at Intake');
+// Budget overflow is deferred and reported, never silently dropped.
+ok(/budget:deferred/.test(su), 'over-budget candidates are deferred with a stated reason, not dropped');
+// CI must actually run the new gates.
+ok(/syntax\.test\.mjs/.test(ciYml), 'CI runs the workflow syntax checker');
+ok(/test_skill_linter\.py/.test(readFileSync(join(wfDir, '..', '..', '.github', 'workflows', 'skill-lint.yml'), 'utf8')),
+   'CI runs the skill_linter --json contract test');
+
+
+// ---------------------------------------------------------------------------
+// content-guard + safe-pr: the publish gate.
+//
+// These assert the properties that make the gate a GATE rather than a habit —
+// things no unit test can see, because they are about ordering, about which
+// agent is constructed at all, and about what an agent is permitted to decide.
+// ---------------------------------------------------------------------------
+const cg = read('content-guard.js');
+const ps = read('safe-pr.js');
+const guardYml = readFileSync(join(wfDir, '..', '..', '.github', 'workflows', 'content-guards.yml'), 'utf8');
+
+// content-guard: deterministic by construction.
+ok(/--changed/.test(cg), 'content-guard runs the changed-scope scan');
+ok(/guardCmd\('changed'\)/.test(cg) && /guardCmd\('full'\)/.test(cg),
+   'content-guard runs BOTH the changed scan and the whole-tree backstop');
+ok(/--redact/.test(cg),
+   'content-guard always redacts — its output lands in an agent transcript');
+ok(/check_neutrality\.py/.test(cg) && /check_no_forks\.py/.test(cg),
+   'content-guard runs the neutrality and no-forks guards too');
+ok(!/[^a-zA-Z]new RegExp\(|AKIA|-----BEGIN/.test(cg),
+   'content-guard forks NO rule from the Python guard — no regex, no pattern, no allowlist');
+ok(/function verdict\(/.test(cg) && /function usable\(/.test(cg),
+   'the verdict is a pure JS function of the relayed facts');
+ok(/exit === 2/.test(cg) && /CONFIG_ERROR/.test(cg),
+   'exit 2 is a config error (scan not trustworthy), distinct from a finding');
+ok(/denylistOk\(/.test(cg),
+   'a scan whose client-name lane never ran cannot be reported as clean');
+ok(/headMismatch/.test(cg),
+   'two lanes disagreeing about HEAD blocks — no single state would have been certified');
+// The exit code the verdict reads is a number an AGENT typed. The tool's own JSON
+// says the same thing authoritatively. Trusting only the transcript would put a
+// model back in the finding path, which is the one thing this design forbids.
+ok(/l\.payload\.exit !== l\.exit/.test(cg),
+   "the relayed exit code is cross-checked against the tool's own JSON verdict");
+ok(/l\.payload\.counts\.findings > 0\) !== \(l\.exit !== 0\)/.test(cg),
+   'a payload listing findings alongside a clean exit code is a disagreement, not a pass');
+ok(!/clean: \{ type|status: \{ type|verdict: \{ type|report_markdown: \{ type/.test(cg),
+   'no agent schema in content-guard can express a verdict — agents are transport only');
+ok(/Do NOT edit, create or delete ANY file/.test(cg),
+   'the scan runner is forbidden from fixing its own failure');
+ok((cg.match(/\.catch\(\(\) =>/g) || []).length >= 3, 'every content-guard agent call fails closed');
+
+// safe-pr: the gate is structural — nothing that can publish exists on the blocked path.
+ok(/workflow\('content-guard'/.test(ps), 'safe-pr delegates the analysis to the standalone workflow');
+ok(ps.indexOf("workflow('content-guard'") < ps.indexOf('git push'),
+   'the guard runs before any push');
+ok(/guard\.clean !== true/.test(ps), 'safe-pr hard-gates strictly on the guard verdict');
+// Comments legitimately DESCRIBE the ordering, so compare positions in code only
+// — otherwise a comment mentioning phase('Plan') satisfies the assertion for free.
+const psCode = ps.replace(/^\s*\/\/[^\n]*$/gm, '');
+ok(psCode.indexOf('guard.clean !== true') < psCode.indexOf("phase('Plan')"),
+   'the gate returns BEFORE the Plan phase, so no publishing agent is ever constructed');
+ok(psCode.indexOf("phase('Guard')") < psCode.indexOf("phase('Commit')")
+   && psCode.indexOf("phase('Verify')") < psCode.indexOf("phase('Publish')"),
+   'phase order is Guard -> Plan -> Commit -> Verify -> Publish');
+// These tokens appear in safe-pr only to FORBID them to the agent. Assert exactly
+// that: every occurrence must sit on a line that prohibits it. A bare absence
+// check would be satisfied by deleting the prohibitions, which is backwards.
+for (const tok of ['--no-verify', '--force', 'git add -A', 'git add .', '--amend']) {
+  const lines = ps.split('\n').filter((l) => l.includes(tok));
+  const bad = lines.filter((l) => !/NEVER|never/.test(l));
+  ok(bad.length === 0,
+     `safe-pr mentions \`${tok}\` only to forbid it (offending line: ${(bad[0] || '').trim().slice(0, 70)})`);
+  ok(lines.length > 0, `safe-pr explicitly forbids \`${tok}\` to the agent`);
+}
+ok(/guard\.stageable_paths/.test(ps), 'safe-pr stages exactly the paths the guard certified');
+ok(/post\.tree_digest !== guard\.tree_digest/.test(ps),
+   'the push is bound to the digest the guard certified — content cannot change under it');
+// The body scan must be a CODE gate, not a sentence asking the agent to stop
+// itself: the scanning agent has no push/gh capability, and the publishing agent
+// is constructed only after JS has seen a clean scan.
+ok(/--scan-file/.test(ps), 'the PR and issue bodies are scanned before they are published');
+ok(/label: 'bodies'/.test(ps) && /label: 'publish'/.test(ps),
+   'writing+scanning the bodies is a separate agent from the one that pushes');
+ok(/bodies\.pr_body_exit !== 0 \|\| bodies\.issue_body_exit !== 0/.test(ps),
+   'a non-zero body scan blocks in code');
+ok(psCode.indexOf('bodies.pr_body_exit !== 0') < psCode.indexOf("label: 'publish'"),
+   'the body-scan gate returns BEFORE the publishing agent is constructed');
+ok(/required: \['ok', 'pr_body_exit', 'issue_body_exit'\]/.test(ps),
+   'both body-scan exit codes are REQUIRED fields — an omitted one cannot default to clean');
+ok(/PROTECTED\.includes\(branch\)/.test(ps), 'safe-pr refuses to commit to main/master');
+ok(/validCommitSubject/.test(ps) && /subjectLeak/.test(ps),
+   'the commit subject is validated in code for convention AND for leakage');
+ok(/Closes #/.test(ps), 'the PR body links an issue, per the repo template');
+ok(!/report_markdown: \{ type/.test(ps), 'the safe-pr report is never authored by an agent');
+ok((ps.match(/\.catch\(\(\) =>/g) || []).length >= 3, 'every safe-pr agent call fails closed');
+
+// A BLOCKED report must describe the state the run actually REACHED. The constant
+// sentence may exist exactly once — as the nothing-happened branch of the function
+// that derives it — because a second copy is how a late failure (the PR step) came
+// to deny a push that had already succeeded, hiding public bytes from the reader.
+ok((ps.match(/Nothing was committed, pushed or published/g) || []).length === 1,
+   'the "nothing happened" sentence exists once, inside the function that derives it');
+ok(/function stateSentence/.test(ps) && /\$\{stateSentence\(state\)\}/.test(ps),
+   'blocked() derives its closing sentence from state instead of asserting a constant');
+ok(/if \(pushed\) return/.test(ps),
+   'a block raised after a successful push reports that the commit is already public');
+
+// Push and PR-open are distinct observable outcomes; one must not be able to erase
+// the other. `gh pr create` refusing because the branch already has an open PR is
+// the success path — the push put the certified commit into that PR.
+ok(/required: \['ok', 'pushed', 'pr_create_exit'\]/.test(ps),
+   'push and PR-create outcomes are REQUIRED and reported separately');
+ok(/const prExisted = publish\.pr_create_exit !== 0/.test(ps),
+   'an already-open PR is classified in code, never by the agent');
+ok(psCode.indexOf('!publish.pushed') < psCode.indexOf('const prUrl'),
+   'the push verdict is settled before the PR verdict, so a PR failure cannot revoke it');
+ok(/gh pr view/.test(ps) && psCode.indexOf('gh pr create') < psCode.indexOf('gh pr view'),
+   'the PR is resolved after the create attempt, whether or not that attempt succeeded');
+ok(!/gh pr edit/.test(ps),
+   'safe-pr never overwrites an existing PR title or description — authored text is not force-pushed');
+
+// CI must enforce the changed-scope gate server-side, and redact its public log.
+ok(/check_client_data\.py --changed/.test(guardYml),
+   'CI runs the changed-scope scan on pull requests');
+ok(/--redact/.test(guardYml), 'CI redacts — an Actions log on a public repo is public');
 
 console.log(`\nwiring: ${pass} passed, ${fail} failed`);
 if (fail) { console.log('\n' + fails.join('\n')); process.exit(1); }
