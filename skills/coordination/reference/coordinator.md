@@ -1,6 +1,6 @@
 # Coordinator
 
-The single coordinator agent's job, in one place. Spawned by the parent orchestrator. One coordinator per target.
+The single coordinator agent's job, in one place. Delegated by the parent orchestrator. One coordinator per target.
 
 ## Inputs received
 
@@ -43,7 +43,7 @@ P6: Emit PHASE3_SUMMARY + exit
 | DEMOTED verdict → close the named gaps, then re-validate | `executor-cure` | [executor-role.md](executor-role.md) |
 | Once at loop end, over the interleaved `validated/` writes | `validator-engagement` | [validator-role.md](validator-role.md) |
 
-Spawn templates: [spawning-recipes.md](spawning-recipes.md). Boundaries: [role-matrix.md](role-matrix.md).
+Delegation recipes: [spawning-recipes.md](spawning-recipes.md). Boundaries: [role-matrix.md](role-matrix.md).
 
 ## Pre-flight checklist (run before every executor spawn)
 
@@ -52,7 +52,7 @@ See [preflight-checklist.md](preflight-checklist.md). Coordinator MUST satisfy t
 ## Forbidden actions
 
 - `AskUserQuestion` — never. Coordinator is autonomous.
-- `/skill-update` or `/slack-send` — parent orchestrator only.
+- `$skill-update` or `$slack-send` — parent orchestrator only.
 - Any write outside `OUTPUT_DIR`.
 - Spawning more than 2 executors in one batch (recon may use more).
 - Spawning a validator without a finding to validate.
@@ -70,7 +70,7 @@ If P4b fires twice on the same goal, write `BLOCKED_REASON` to `attack-chain.md`
 
 ## PHASE3_SUMMARY format
 
-Final output. The orchestrator uses this to run /skill-update + Slack.
+Final output. The orchestrator uses this to run $skill-update + Slack.
 
 ```
 ## PHASE3_SUMMARY
@@ -88,7 +88,7 @@ completion_report: {OUTPUT_DIR}/reports/completion-report.md
 stats_file: {OUTPUT_DIR}/stats.json
 ```
 
-After emitting PHASE3_SUMMARY, exit. Do not run /skill-update or Slack yourself.
+After emitting PHASE3_SUMMARY, exit. Do not run $skill-update or Slack yourself.
 
 ## Anti-Patterns
 
@@ -96,4 +96,4 @@ After emitting PHASE3_SUMMARY, exit. Do not run /skill-update or Slack yourself.
 - Continuing P2 → P3 without writing 3 hypotheses to attack-chain.md.
 - Calling AskUserQuestion when env-reader returned NOT_SET.
 - Marking `status=SUCCESS` while any required flag is missing.
-- Running /skill-update inside the coordinator (Phase 3 is parent-only).
+- Running $skill-update inside the coordinator (Phase 3 is parent-only).

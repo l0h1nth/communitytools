@@ -11,7 +11,7 @@ Automates: scope parsing → parallel testing per asset → **authoritative find
 
 1. Input: HackerOne program URL or scope CSV.
 2. Parse scope and program guidelines.
-3. Spawn one coordinator per eligible asset (parallel).
+3. Delegate one `coordinator` agent per eligible asset (parallel).
 4. Each coordinator runs the standard engagement flow (see `skills/coordination/SKILL.md`).
 5. Run the **`validate-findings` workflow per asset** (authoritative submission gate). Generate HackerOne reports from the validated set ONLY — never submit a finding that is not `VALID`/`REPAIRED`.
 
@@ -28,12 +28,15 @@ Parse with `skills/hackerone/tools/csv_parser.py`. Filter for `eligible_for_subm
 
 ## Agent deployment
 
-One coordinator per asset, spawned in parallel:
+One coordinator per asset, delegated in parallel:
 
-```python
-coordinator_role = Read("skills/coordination/SKILL.md")
-Agent(prompt=f"{coordinator_role}\n\nTARGET: {asset_url}\nSCOPE: {program_guidelines}\nOUTPUT_DIR: ...",
-      run_in_background=True)
+```text
+Delegate to the custom Codex agent `coordinator`:
+Read skills/coordination/SKILL.md first.
+TARGET: <asset_url>
+SCOPE: <program_guidelines>
+OUTPUT_DIR: <asset output directory>
+Return PHASE3_SUMMARY when complete.
 ```
 
 10 assets → 10 parallel coordinators (~2-4 h vs 20-40 h sequential). Each coordinator follows `skills/coordination/SKILL.md` and `reference/role-matrix.md`.
@@ -42,25 +45,20 @@ Agent(prompt=f"{coordinator_role}\n\nTARGET: {asset_url}\nSCOPE: {program_guidel
 
 Every finding requires `poc.py` (executable exploit), `poc_output.txt` (timestamped execution proof), manual repro steps, and evidence (screenshots / HTTP captures / video). This is the input the validator consumes.
 
-**After each asset's coordinator returns, the orchestrator runs the `validate-findings` workflow for that asset and submits ONLY findings it marks `VALID` or `REPAIRED`:**
+**After each asset's coordinator returns, the parent runs the `validate-findings` workflow for that asset and submits ONLY findings it marks `VALID` or `REPAIRED`:**
 
-```python
-v = Workflow(name="validate-findings", args={
-    "output_dir": asset_output_dir,   # the coordinator's OUTPUT_DIR
-    "target": asset_url,
-    "business_tier": "revenue",       # production/external bug-bounty scope; else "unknown"
-    "votes": 3,                       # adversarial refuters per finding (bounty = stricter)
-    "repair": True,                   # regenerate broken/absent PoCs so each finding has a runnable evidence script
-    "strict": True,                   # one failed gate => REJECTED
-})
-# v.counts -> {total, valid, repaired, rejected}; v.validated[] / v.rejected[]
-# Verdicts at {asset_output_dir}/artifacts/validated/{id}.json (+ false-positives/).
-# Asset report at {asset_output_dir}/reports/validation-report.md.
-```
+The parent Codex thread runs the validation workflow from
+`workflows/validate-findings.js` for each returned asset, passing `output_dir`,
+`target`, `business_tier`, `votes`, `repair`, and `strict`. It accepts
+only `VALID` or `REPAIRED` verdicts and reads the result from
+`{asset_output_dir}/artifacts/validated/` plus the validation report.
 
 `validate-findings` is the authoritative gate because it directly preempts the most common HackerOne rejections: it verifies each CVE against **NVD + a recomputed CVSS base score (from the vector) + CISA KEV + the vendor advisory**, **runs (and repairs) every PoC** until it emits the evidence that proves the issue, **recomputes the risk/severity**, corroborates every claim against raw evidence, and kills false positives via **adversarial refutation**.
 
-The orchestrator is the only layer that runs this workflow (it is top-level; the workflow is one level below — legal nesting). To avoid double work, coordinators may treat their **interleaved per-finding validators** (run the instant each candidate is materialized) as a provisional self-check; the standalone `validate-findings` verdict is authoritative for submission. A `REJECTED` finding is a false positive — it never enters a submission, an appendix, or a count; its `artifacts/false-positives/{id}.json` is the sole record. Likewise a coordinator-dropped candidate (uncured DEMOTED, in `artifacts/dropped/`) is never submitted.
+The parent thread is the only layer that runs this workflow. To avoid double work,
+coordinators may treat their **interleaved per-finding validators** as a provisional
+self-check; the standalone validation verdict is authoritative for submission. A
+`REJECTED` finding is a false positive and never enters a submission, appendix, or count.
 
 The HackerOne PoC contract is a superset of the standard finding contract (`skills/coordination/reference/validator-role.md`).
 

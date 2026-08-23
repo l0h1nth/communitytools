@@ -5,7 +5,7 @@ Platform-specific operational steps. The generic orchestrator/coordinator workfl
 ## 1. Credentials
 
 ```bash
-python3 ./tools/env-reader.py HTB_USER HTB_PASS HTB_TOKEN ANTHROPIC_API_KEY SLACK_BOT_TOKEN HTB_SLACK_CHANNEL_ID
+python3 ./tools/env-reader.py HTB_USER HTB_PASS HTB_TOKEN SLACK_BOT_TOKEN HTB_SLACK_CHANNEL_ID
 ```
 
 | Variable | Purpose |
@@ -115,7 +115,7 @@ The Guided-Mode endpoints aren't documented; they're discoverable from the SPA's
   ```
 - **Initial creds in `info.info_status`** — Retired AD machines sometimes ship a starter credential pair via the profile endpoint. Read it before assuming unauthenticated exploitation: `curl ... | jq .info.info_status`.
 - **Resubmission protocol when "submission blocked"** — Verify ownership via profile; if unsubmitted, resubmit from the orchestrator with `--http1.1` and default UA. Don't mark the engagement as failed when only the submit transport failed.
-- **Coordinator blocked by usage policy** — When a spawned coordinator hits an "API Error: blocked under Anthropic's Usage Policy" mid-run, the orchestrator continues inline using whatever recon files the coordinator wrote, and tags `stats.json` with `"agent_blocked_by_policy": true`. Don't re-spawn the same coordinator with the same prompt.
+- **Coordinator blocked by provider policy** — When a delegated coordinator hits a provider usage-policy error mid-run, the orchestrator continues inline using whatever recon files the coordinator wrote, and tags `stats.json` with `"agent_blocked_by_policy": true`. Do not re-delegate the same coordinator with the same prompt.
 - **Writeup PDF extraction** — Always use `pdftotext` CLI for exact text. Visual PDF rendering causes font-kerning errors (e.g., "ww" rendering as "wu").
 - **Challenge `play_methods: ["download","container"]` split** — Some challenges (esp. Forensics) ship a downloadable evidence file AND a container that is only a *validation portal* (e.g. a Flask app whose `/vault`-style route returns the flag once you present a recovered cookie/credential). The container serves NO evidence. If `download=False` while `file_name` is set, the static download is NOT retrievable via the API bearer token (`/api/v4/challenge/download/<id>` → 404 `Challenge file not found`); it needs the logged-in **web-session** (SSO) download. The orchestrator fetches it (browser / asks the user to drop it in `artifacts/`); coordinators can't.
 - **Per-challenge `authUserSolve` is the only reliable solve flag** — the `/challenges` list endpoint returns `solved`/`authUserSolve` as `null` for every item (and `is_owned` is true for all official challenges, ≠ "solved by me"). To find unsolved challenges, hit `/api/v4/challenge/info/<id>` per candidate and read `authUserSolve`.

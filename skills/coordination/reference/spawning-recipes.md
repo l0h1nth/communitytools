@@ -1,225 +1,127 @@
-# Spawning Recipes
+# Codex delegation recipes
 
-Copy-paste-ready spawn patterns per role. Context contracts in [role-matrix.md](role-matrix.md). Boundaries (forbidden context per role) enforced by the contract.
+Delegation contracts for the coordinator. Codex exposes the named custom agents from
+`.codex/agents/`; ask Codex to delegate a bounded prompt to the named agent and wait for
+the result before integrating it. The coordinator owns the queue and bookkeeping.
 
-## Common preamble (any spawn from coordinator)
+## Common context
 
-```python
-output_dir = "<OUTPUT_DIR>"
-chain = Read(f"{output_dir}/attack-chain.md")
-experiments = Read(f"{output_dir}/experiments.md")
+Every worker prompt should include only the fields needed for its role:
+
+```text
+OUTPUT_DIR: <absolute engagement directory>
+TARGET: <one target or asset>
+OBJECTIVE: <one bounded mission>
+MISSION_ID: m-<number>
+EXPERIMENT_ID: E-<number>
 ```
 
-## Coordinator (orchestrator → coordinator)
+The coordinator may include the current `attack-chain.md` and `experiments.md` when the
+role contract permits them. Read the role file and the one or two specific technique
+references first; do not mount the entire skill library into a worker prompt.
 
-The orchestrator creates the engagement dir tree (no bookkeeping files), then spawns one coordinator subagent per target. The `FIRST_ACTION` block makes the bookkeeping bootstrap a precondition for any other tool call inside the subagent — the gate is in the prompt itself, not in a doc the agent might skim.
+## Coordinator
 
-```python
-coordinator_role = Read("skills/coordination/SKILL.md")
-Agent(
-    name=f"coordinator-{target_tag}",
-    description=f"Coordinator: {target_tag}",
-    prompt=f"""{coordinator_role}
+The parent thread creates the engagement tree and delegates one `coordinator` agent per
+target. The delegation prompt must tell the coordinator to perform this first action:
 
-OUTPUT_DIR: {output_dir}
-TARGET: {target}
-SCOPE: {scope}
-SKILLS_HINT: {skills_hint or '<none>'}
+1. Create `attack-chain.md` and `experiments.md` in `OUTPUT_DIR`.
+2. Run the preflight gate in `preflight-checklist.md`.
+3. Delegate executors only after the bookkeeping files exist.
 
-FIRST_ACTION (before any other tool call):
-  1. Write({output_dir}/attack-chain.md, "<skeleton per bookkeeping.md §attack-chain.md>")
-  2. Write({output_dir}/experiments.md, "<header row per bookkeeping.md §experiments.md>")
-  3. Then run preflight-checklist Phase 1 gate (see reference/preflight-checklist.md).
-Bookkeeping files MUST exist before spawning any executor. The coordinator-flow-gate hook
-will block downstream Bash/Edit/Write on the engagement dir until attack-chain.md exists.
-""",
-    run_in_background=True,
-)
+Keep a strict one-to-one relationship between coordinator and target. Queue additional
+targets instead of spawning an unbounded pool.
+
+## Executor: explore
+
+Delegate to `executor` with:
+
+```text
+ROLE: explore
+MISSION_ID: m-<number>
+EXPERIMENT_ID: E-<number>
+OBJECTIVE: <recon or source-analysis objective>
+OUTPUT_DIR: <path>
+CHAIN_CONTEXT: <current chain, if allowed>
+EXPERIMENTS: <current experiment log, if allowed>
+SKILL_FILES: <one or two specific reference paths>
 ```
 
-**Anti-pattern: running the coordinator workflow inline in the orchestrator session.** The bookkeeping discipline (goal_attempts counting, mandatory skeptic checkpoints, blind validators) requires the subagent boundary. If the parent session starts doing P1-P5 itself, the `coordinator-flow-gate` PreToolUse hook will block on the first Bash/Edit/Write targeting the engagement dir.
+Explore workers observe and document; they do not create a finding or write to
+`findings/`.
 
-## Executor — explore (recon, no findings)
+## Executor: exploit
 
-```python
-executor_role = Read("skills/coordination/reference/executor-role.md")
-skill_file   = Read("skills/<domain>/reference/<technique>-patterns.md")  # 1-2 max
+Delegate to `executor` with the confirmed theory, one scenario reference, the target,
+and the exact evidence contract. Require a reproducible proof, raw request/response or
+equivalent evidence, and a clear limitation statement. Do not ask an exploit worker to
+load the full `SKILL.md` when the scenario reference is enough.
 
-Agent(description=f"Recon: {objective}", prompt=f"""{executor_role}
+## Skeptic
 
-role: explore
-MISSION_ID: m-{NNN}
-EXPERIMENT_ID: E-{NNN}
-OBJECTIVE: {objective}
-OUTPUT_DIR: {output_dir}
+At experiments 5, 15, and 25, delegate to `skeptic` with only:
 
-CHAIN_CONTEXT:
-{chain}
-
-EXPERIMENTS:
-{experiments}
-
-SKILL_FILES:
-{skill_file}
-""", run_in_background=True)
+```text
+OBJECTIVE: <current goal>
+OUTPUT_DIR: <path>
+EXPERIMENT_COUNT: <N>
+EXPERIMENTS: <experiment history>
+RECON_LISTING: <sanitized listing>
 ```
 
-Forbidden: writing to `findings/` (explore agents observe; they do not claim).
+The skeptic must not receive `attack-chain.md`, executor reasoning, skill files, or the
+research brief. It returns alternative hypotheses and disconfirming tests without
+modifying the engagement.
 
-## Executor — exploit (confirmed theory → end-to-end)
+## Validator: finding
 
-```python
-executor_role = Read("skills/coordination/reference/executor-role.md")
-skill_file   = Read("skills/<domain>/reference/<technique>-patterns.md")
-scenario     = Read("skills/<domain>/reference/scenarios/<category>/<technique>.md")
-patt_url     = "<specific PATT URL>"
+Immediately after a candidate finding is materialized, delegate a fresh `validator`:
 
-# Optional research brief (≤10 lines, ≥1 [wildcard])
-research = "RESEARCH_BRIEF:\n- [model] ...\n- [web] ...\n- [wildcard] ..."
-
-Agent(description=f"Exploit: {objective}", prompt=f"""{executor_role}
-
-role: exploit
-MISSION_ID: m-{NNN}
-EXPERIMENT_ID: E-{NNN}
-OBJECTIVE: {objective}
-OUTPUT_DIR: {output_dir}
-
-CHAIN_CONTEXT:
-{chain}
-
-EXPERIMENTS:
-{experiments}
-
-SKILL_FILES:
-{skill_file}
-
-SCENARIO:
-{scenario}
-
-PATT_URL: {patt_url}
-
-{research if research else ''}
-""", run_in_background=True)
+```text
+CLASS: finding
+FINDING_ID: <id>
+FINDING_DIR: <path>
+TARGET_URL: <target>
+OUTPUT_DIR: <artifacts path>
+VALIDATION_PROCEDURE: skills/coordination/reference/VALIDATION.md
 ```
 
-## Skeptic (mandatory at experiments 5, 15, 25)
+The validator receives evidence and the validation procedure only. It must not see the
+attack chain, other findings, executor logs, or the coordinator's theory. It writes the
+contractual result under `artifacts/validated/`, `artifacts/false-positives/`,
+`artifacts/dropped/`, or returns `CURE` with named gaps.
 
-Blind to attack-chain. Argues against the dominant theory.
+## Executor: cure
 
-```python
-skeptic_role  = Read("skills/coordination/reference/skeptic-role.md")
-recon_listing = Bash(f"ls -la {output_dir}/recon/")
+On `CURE`, delegate a fresh `executor` with only the named failed checks and missing
+evidence. The cure worker closes those gaps and does not re-theorize or expand scope.
+Then delegate a fresh blind validator; never reuse the previous validator context.
 
-Agent(description=f"Skeptic: experiment {N}", prompt=f"""{skeptic_role}
+## Validator: engagement
 
-OBJECTIVE: {objective}
-OUTPUT_DIR: {output_dir}
-EXPERIMENT_COUNT: {N}
+After every candidate has reached a terminal verdict, delegate `validator` once with:
 
-EXPERIMENTS:
-{experiments}
-
-RECON_LISTING:
-{recon_listing}
-""", run_in_background=True)
+```text
+CLASS: engagement
+OUTPUT_DIR: <path>
 ```
 
-Forbidden: reading `attack-chain.md`, skill files, RESEARCH_BRIEF.
+It checks completeness and reporting contracts without reading the coordinator's
+private theory. The coordinator returns `PHASE3_SUMMARY` only after this review.
 
-## Validator — finding (interleaved, blind — the instant INTEGRATE materializes a candidate)
+## Cadence and limits
 
-Spawn this **right after INTEGRATE** produces the candidate, before the next batch — not in a downstream one-shot pass. Re-spawn a **fresh** validator each cure round so the blind contract holds across the whole convergence loop.
+- Run one coordinator per target.
+- Run no more than two executors in a normal batch.
+- Wait for all workers in a batch before integrating results.
+- Validate each candidate before starting the next batch.
+- Spawn a fresh validator for every cure round.
+- Keep findings and evidence inside the assigned `OUTPUT_DIR`.
 
-```python
-validator_role = Read("skills/coordination/reference/validator-role.md")
-validation_doc = Read("skills/coordination/reference/VALIDATION.md")
+## Anti-patterns
 
-Agent(description=f"Validate finding {finding_id}", prompt=f"""{validator_role}
-
-class: finding
-finding_id: {finding_id}
-FINDING_DIR: {output_dir}/findings/finding-{finding_id}/
-TARGET_URL: {target_url}
-OUTPUT_DIR: {output_dir}/artifacts
-
-VALIDATION_PROCEDURE:
-{validation_doc}
-""", run_in_background=True)
-# → CONFIRMED (validated/) | REJECTED (false-positives/) | CURE | DROPPED (dropped/)
-```
-
-Forbidden: attack-chain, other findings, executor logs, skill files (except VALIDATION.md), RESEARCH_BRIEF.
-
-## Executor — cure (on a DEMOTED verdict, before re-validation)
-
-Handed ONLY the named gaps — must **not** re-theorize. Closes exactly those, then the coordinator re-validates on a fresh blind agent.
-
-```python
-executor_role = Read("skills/coordination/reference/executor-role.md")
-
-Agent(description=f"Cure finding {finding_id}", prompt=f"""{executor_role}
-
-role: cure
-finding_id: {finding_id}
-FINDING_DIR: {output_dir}/findings/finding-{finding_id}/
-FAILED_CHECKS: {failed_checks}
-MISSING_EVIDENCE: {missing_evidence}
-
-Close EXACTLY these gaps (write the named missing-evidence files, repair/re-run poc.py,
-fix the CVSS vector). Do NOT re-theorize, do NOT expand scope.
-""", run_in_background=True)
-```
-
-Forbidden: attack-chain, coordinator theory, other findings, refuter/validator reasoning.
-
-## Validator — engagement (once at loop end, blind)
-
-```python
-validator_role = Read("skills/coordination/reference/validator-role.md")
-
-Agent(description=f"Validate engagement thoroughness", prompt=f"""{validator_role}
-
-class: engagement
-OUTPUT_DIR: {output_dir}
-""", run_in_background=True)
-```
-
-Forbidden: attack-chain, finding internals, validator-finding artifacts.
-
-## Patterns
-
-### Batch of 1-2 executors (depth-first cadence)
-
-```python
-ids = []
-for mission in missions[:2]:
-    a = Agent(prompt=..., run_in_background=True)
-    ids.append(a)
-# Wait for all → integrate → update chain → next batch.
-```
-
-### Interleaved per-candidate validation (the instant it's materialized)
-
-```python
-# Right after INTEGRATE produces a candidate — before the next THINK/batch:
-Agent(prompt=finding_validator_prompt, run_in_background=True)  # checks + refuters×3 ∥ probe ∥ reproducer
-# computeVerdict → CONFIRMED | REJECTED | CURE (spawn cure executor, re-validate FRESH) | DROPPED.
-# Coverage flips only on VALID (coverage-by-VALID); REJECTED/DROPPED → class stays pending, keep searching.
-```
-
-### Engagement validator (once at loop end)
-
-```python
-# After the loop ends — every candidate already validated inline to a terminal verdict:
-Agent(prompt=engagement_validator_prompt, run_in_background=True)
-```
-
-## Anti-Patterns
-
-- Mounting `SKILL.md` files into executor prompts. Pass the specific reference / scenario file, not the navigation file.
-- Mounting > 2 skill files into one executor.
-- Letting a validator see `attack-chain.md` (breaks blind contract).
-- Letting a skeptic see `attack-chain.md` (breaks anti-bias contract).
-- Spawning > 2 executors in one batch (recon excepted).
-- Spawning a `validator-finding` without a corresponding `findings/finding-{id}/`.
+- Passing all skills or all references to every worker.
+- Letting a validator or skeptic read `attack-chain.md`.
+- Treating an executor's claim as a validated finding.
+- Running the coordinator workflow inline while pretending it is delegated.
+- Spawning workers without a populated `OUTPUT_DIR`.

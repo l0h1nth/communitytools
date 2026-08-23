@@ -193,20 +193,12 @@ Validators write ONLY to `evidence/validation/`. Never modify executor files. **
 
 The coordinator does not batch all validators at the end. Immediately after INTEGRATE materializes a candidate — before the next THINK/batch — it runs the convergence loop for that candidate on **fresh** blind agents:
 
-```python
-validator_role = Read("skills/coordination/reference/validator-role.md")
-
-# Right after INTEGRATE produces THIS candidate — before the next batch:
-Agent(prompt=f"{validator_role}\n\n"
-             f"finding_id: {finding['id']}\n"
-             f"finding_json_path: {findings_file}\n"
-             f"raw_dir: {{OUTPUT_DIR}}/recon/\n"
-             f"executor_log: {{OUTPUT_DIR}}/logs/{executor}.log\n"
-             f"findings_dir: {{OUTPUT_DIR}}/findings/\n"
-             f"output_dir: {{OUTPUT_DIR}}/artifacts/",
-      run_in_background=True)
-# → CONFIRMED | REJECTED | CURE (close named gaps, re-validate on fresh agents) | DROPPED
-```
+Immediately after INTEGRATE produces THIS candidate — before the next batch — delegate
+to the custom Codex agent `validator` with the validator role contract and only this
+context: `finding_id`, `finding_json_path`, `raw_dir`, the relevant executor log,
+`findings_dir`, and `output_dir`. The validator returns:
+`CONFIRMED | REJECTED | CURE | DROPPED` (a CURE must close named gaps and be
+re-validated by a fresh validator).
 
 Per terminal verdict, the coordinator:
 1. Routes CONFIRMED → `{OUTPUT_DIR}/artifacts/validated/{id}.json`, REJECTED → `false-positives/{id}.json`, uncured DROPPED → `dropped/{id}.json`.

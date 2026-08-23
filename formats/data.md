@@ -88,4 +88,4 @@ A cell is `covered` only when a `VALID`/`REPAIRED` finding matches on **all thre
 - Finding JSON files live in `{OUTPUT_DIR}/findings/finding-NNN/`
 - All JSON must be valid and parseable
 - See `formats/reconnaissance.md` for detailed reconnaissance schemas
-- See CLAUDE.md for the canonical `OUTPUT_DIR` directory structure
+- See AGENTS.md for the canonical `OUTPUT_DIR` directory structure

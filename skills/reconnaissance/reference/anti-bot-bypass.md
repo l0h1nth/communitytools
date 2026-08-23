@@ -24,25 +24,17 @@ Headless browsers are trivially detected. ALWAYS use headed mode.
 
 **In Docker/server (no display):**
 ```bash
-# Start Xvfb BEFORE Claude Code (the kali-claude-setup.sh script does this automatically)
+# Start Xvfb BEFORE Codex (the kali-codex-setup.sh script does this automatically)
 Xvfb :99 -screen 0 1920x1080x24 &>/dev/null &
 export DISPLAY=:99
 ```
 
 **IMPORTANT**: Do NOT use `xvfb-run` as the MCP command — it wraps stdin/stdout and breaks MCP's stdio communication pipe. Instead, start Xvfb separately and set DISPLAY. The MCP server then launches headed Chrome which uses the virtual display.
 
-**Playwright MCP config for Docker** (`.claude/mcp.json`):
-```json
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": ["@playwright/mcp@latest",
-               "--launch-options", "{\"args\":[\"--disable-blink-features=AutomationControlled\",\"--no-sandbox\",\"--disable-setuid-sandbox\",\"--window-size=1920,1080\"]}"]
-    }
-  }
-}
-```
+Configure Playwright MCP through the project-scoped `.codex/config.toml`; keep
+the server command and launch arguments there rather than in a client-specific
+JSON file. The Codex project config can also inherit the repository's
+`transilience_vuln` server entry.
 
 ### 2. Anti-Detection Browser Flags
 

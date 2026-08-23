@@ -4,7 +4,7 @@ Standardized output format specifications for all engagements. Every deliverable
 
 ## Engagement Output Types
 
-Core folder-level formats defining what goes where in `{OUTPUT_DIR}/` (see CLAUDE.md for canonical directory structure):
+Core folder-level formats defining what goes where in `{OUTPUT_DIR}/` (see AGENTS.md for canonical directory structure):
 
 | Format | File | Description |
 |--------|------|-------------|

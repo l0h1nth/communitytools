@@ -97,7 +97,7 @@ Before contributing, ensure you have:
 
 - **Git** installed ([download](https://git-scm.com/downloads))
 - **GitHub account** ([sign up](https://github.com/join))
-- **Claude Code** installed ([download](https://claude.ai/code))
+- **Codex** installed ([download](https://developers.openai.com/codex/cli/))
 - **Python 3.8+** for Python-based tools
 - **GitHub CLI** (optional but recommended): `brew install gh` or [install guide](https://cli.github.com/)
 
@@ -273,15 +273,16 @@ Every new tool should follow this structure:
 ```
 tool-name/
 ├── README.md              # User-facing documentation
-├── CLAUDE.md              # Claude Code integration context
+├── AGENTS.md              # Codex integration context
 ├── LICENSE                # MIT License (or compatible)
 ├── requirements.txt       # Python dependencies
-├── .claude/
-│   ├── skills/           # Claude Code skills (if applicable)
-│   │   └── agent-name.md
-│   └── skills/           # Claude Code skills (if applicable)
+├── .agents/
+│   └── skills/           # Codex skills (if applicable)
 │       └── skill-name/
 │           └── SKILL.md
+├── .codex/
+│   └── agents/           # Optional named Codex subagents
+│       └── agent-name.toml
 ├── src/                  # Source code
 ├── tests/                # Test files
 └── outputs/              # Output directory
@@ -300,8 +301,8 @@ tool-name/
 - License information
 - Legal disclaimer (for security tools)
 
-**CLAUDE.md should include:**
-- Context for Claude Code
+**AGENTS.md should include:**
+- Context for Codex
 - Agent descriptions
 - Skill capabilities
 - Workflow instructions
@@ -311,7 +312,7 @@ tool-name/
 
 - [ ] Create tool directory with proper structure
 - [ ] Write comprehensive README.md
-- [ ] Add CLAUDE.md for Claude Code integration
+- [ ] Add AGENTS.md for Codex integration
 - [ ] Include requirements.txt with dependencies
 - [ ] Add LICENSE file (MIT recommended)
 - [ ] Write tests if applicable
@@ -349,12 +350,12 @@ What constitutes a positive finding?
 What reports and evidence does this agent generate?
 
 ## Testing Instructions
-Step-by-step instructions for Claude Code to execute
+Step-by-step instructions for Codex to execute
 ```
 
 **Agent File Location:**
 ```
-pentest/.claude/agents/agent-name.md
+pentest/.codex/agents/agent-name.toml
 ```
 
 **Agent Naming Convention:**
@@ -533,7 +534,7 @@ python -m pytest tests/ -v
 When making changes, update:
 
 1. **README.md** - User-facing documentation
-2. **CLAUDE.md** - Claude Code context
+2. **AGENTS.md** - Codex context
 3. **Code comments** - Inline documentation
 4. **CHANGELOG.md** - Track changes (if applicable)
 5. **Root README** - If adding new tools
@@ -625,7 +626,7 @@ Agent should differentiate between application content and actual SQL errors
 False positive reported
 
 **Environment:**
-- Claude Code version: 1.0.0
+- Codex version: 1.0.0
 - Python version: 3.9.5
 - Target: http://example.com/help
 

@@ -46,7 +46,7 @@ File tail contains `Connection lost. Press Enter to start a new session.` or sim
 
 Re-export command: same `show full-configuration` as before, but with unlimited scrollback on the SSH client (PuTTY: Lines of scrollback = 200000; iTerm2: unlimited) and no idle-disconnect timeout. Consider `execute backup config tftp ...` which streams to a file rather than terminal.
 
-**What the orchestrator should do:** when `can_parse()` succeeds (config-version sentinel present) but `parse()` yields 0 `NormalizedRule`s, raise a `PartialExportWarning` rather than returning silently. The `/launch` command spec instructs Claude to move such configs to `engagement-dir/_deferred/<name>` with a README explaining why, and disclose them explicitly in the final report's §10 Limitations section.
+**What the orchestrator should do:** when `can_parse()` succeeds (config-version sentinel present) but `parse()` yields 0 `NormalizedRule`s, raise a `PartialExportWarning` rather than returning silently. The `launch` skill spec instructs Codex to move such configs to `engagement-dir/_deferred/<name>` with a README explaining why, and disclose them explicitly in the final report's §10 Limitations section.
 
 ## v0.2 / v0.3 plans
 - v0.2: UTM profile scoring (`ips-sensor`, `av-profile`, `webfilter-profile`).

@@ -3,7 +3,7 @@ name: review
 description: Triage findings in chat. Operator sees each finding with evidence, chooses approve / request-changes / other per finding (or batches).
 ---
 
-# /review — Triage findings in chat
+# review — Triage findings in chat
 
 No arguments. Operates on `findings.final.jsonl` in the most recent engagement.
 
@@ -94,7 +94,7 @@ When the operator says `done` OR every finding has a decision, print:
   Other:            K
   Total decisions:  N+M+K / <total>
 
-Next: /report to render PDF + Excel.
+Next: report to render PDF + Excel.
 ```
 
 ## Hard rules
@@ -102,4 +102,4 @@ Next: /report to render PDF + Excel.
 - Never fabricate evidence. If a finding's `evidence.quoted_rule_text` is empty or missing, surface it anyway but flag `⚠️ evidence incomplete — citation-verifier may have quarantined this; do NOT ship without manual verification`.
 - Operator's free-text reason is verbatim recorded. Do not paraphrase or summarize their reasoning into `feedback.jsonl`.
 - If the operator says "request changes F3 severity=<new>", validate that `<new>` is one of {Critical, High, Medium, Low, Info}. If not, ask.
-- Findings in `held/` and `quarantine/` do NOT appear in `/review`. They require a separate manual escalation path, documented in the report's Limitations section.
+- Findings in `held/` and `quarantine/` do NOT appear in `review`. They require a separate manual escalation path, documented in the report's Limitations section.

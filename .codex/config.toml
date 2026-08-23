@@ -1,0 +1,18 @@
+# Project-scoped Codex configuration.
+# Keep credentials in the environment; this file intentionally contains no secrets.
+
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 8
+
+# Optional local MCP server for CVE enrichment. Codex can still start without the
+# API key; remote enrichment reports a clear configuration error until the key is set.
+[mcp_servers.transilience_vuln]
+command = "python3"
+args = ["mcp/transilience-vuln/server.py"]
+cwd = "."
+env_vars = ["TRANSILIENCE_API_KEY", "TRANSILIENCE_CACHE_DIR", "TRANSILIENCE_RATE_LIMIT"]
+startup_timeout_sec = 15
+tool_timeout_sec = 60
+required = false
+default_tools_approval_mode = "prompt"

@@ -287,7 +287,7 @@ def _arg_value(flag: str) -> str | None:
 
 def violation_key(v: dict) -> str:
     """Stable identity of a violation across two runs. Mirrors violationKey() in
-    .claude/workflows/lib/wf-helpers.mjs — same fields, same order, same truncation."""
+    workflows/lib/wf-helpers.mjs — same fields, same order, same truncation."""
     return "|".join([v["code"], v["file"], str(v["line"] or 0), (v["detail"] or "")[:60]])
 
 
@@ -341,7 +341,7 @@ def write_baseline(violations: list[str], path: str) -> int:
 
 
 def emit_json(violations: list[str]) -> int:
-    """Machine-readable payload for `.claude/workflows/skill-update.js`.
+    """Machine-readable payload for `workflows/skill-update.js`.
 
     Always exits 0: the JSON *is* the result, and the relay agent must not have to
     reason about exit codes. The human mode keeps exit 1 so CI is unaffected.

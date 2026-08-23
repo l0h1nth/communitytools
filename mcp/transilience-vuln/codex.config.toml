@@ -1,0 +1,8 @@
+# Copy this server entry into the repository's .codex/config.toml.
+# Keep credentials in the environment; do not put API keys in this file.
+[mcp_servers.transilience_vuln]
+command = "/ABSOLUTE/PATH/TO/communitytools/mcp/transilience-vuln/.venv/bin/python"
+args = ["/ABSOLUTE/PATH/TO/communitytools/mcp/transilience-vuln/server.py"]
+env_vars = ["TRANSILIENCE_API_KEY", "TRANSILIENCE_RATE_LIMIT", "TRANSILIENCE_CACHE_DIR"]
+startup_timeout_sec = 15
+tool_timeout_sec = 60

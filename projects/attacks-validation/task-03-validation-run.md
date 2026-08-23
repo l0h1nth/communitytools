@@ -68,7 +68,7 @@ This is the only task in the pipeline that executes attacker techniques against 
 - **No DoS or brute-force.** Brute-force prohibition is enforced at all 4 levels (coordinator-spawn, coordinator, executor, validator). No request floods, no slowloris, no auth-loops.
 - **Scope discipline.** PoCs fire only against the asset + endpoint declared in the scope row. Neighbours, internal pivots, and lateral targets are out of scope for this task — those are inferred later by the stitcher from confirmed findings, never by direct probing.
 - **Evidence is observation.** `evidence/raw-source.txt` records the response body / headers / leaked content. It does NOT contain replayable destructive payloads. The validator may re-fire the PoC; safety must hold under replay.
-- **Coordinator is autonomous.** Never calls `AskUserQuestion`. Missing creds → `status: BLOCKED` with `BLOCKED_REASON` (CLAUDE.md Rule 1).
+- **Coordinator is autonomous.** Never calls `AskUserQuestion`. Missing creds → `status: BLOCKED` with `BLOCKED_REASON` (AGENTS.md Rule 1).
 
 ## Operational caps
 

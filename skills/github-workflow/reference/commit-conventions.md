@@ -49,7 +49,7 @@ and short-tag payload optimization.
 
 Fixes #42
 
-Co-Authored-By: Claude <noreply@anthropic.com>
+Record automation in commit metadata only when the project policy requires it; do not invent a co-author identity.
 EOF
 )"
 ```

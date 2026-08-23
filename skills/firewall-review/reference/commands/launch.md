@@ -1,11 +1,11 @@
 ---
 name: launch
-description: Parse all configs in the current engagement, dispatch senior-pentester subagents in parallel, run the validation chain, emit findings ready for /review.
+description: Parse all configs in the current engagement, dispatch senior-pentester subagents in parallel, run the validation chain, emit findings ready for review.
 ---
 
-# /launch — Run the detection + validation pipeline
+# launch — Run the detection + validation pipeline
 
-No arguments. Claude infers the engagement directory from the most recently scaffolded `engagements/*/` folder, OR asks the operator which engagement.
+No arguments. Codex infers the engagement directory from the most recently scaffolded `engagements/*/` folder, OR asks the operator which engagement.
 
 ## What to do
 
@@ -35,7 +35,7 @@ No arguments. Claude infers the engagement directory from the most recently scaf
 ### Step 2 — Validate the scoping questionnaire
 
 - Read `Pre-requisites/scoping-questionnaire.yaml`.
-- **Before asking the operator for any missing fields, pre-populate from the dropped configs** (see CLAUDE.md § "extract what you can from the inputs"). In practice:
+- **Before asking the operator for any missing fields, pre-populate from the dropped configs** (see AGENTS.md § "extract what you can from the inputs"). In practice:
   - Walk every config file under `Pre-requisites/` (flat layout) OR `Pre-requisites/<vendor>/` (legacy layout). Derive `in_scope_devices` from hostnames (flat list of device-name strings — NOT structured dicts, the renderers crash on dicts).
   - Grep for regulatory-scope hints in address-object names (`PCI-*`, `HIPAA-*`, `CDE-*`, `SOX-*`, `PHI-*`) and pre-populate `regulatory_overlay` accordingly.
   - Derive candidate `in_scope_zones` from region codes in hostnames + zone declarations (`config system zone` on FortiGate / Palo Alto equivalents).
@@ -85,7 +85,7 @@ Sequence matters. Do NOT parallelize this.
 
 Record each finding's `cto_mode` / `ciso_mode` / `qa_mode` explicitly so the PDF appendix + manifest.json can disclose which findings got human-equivalent LLM review vs automated verification. This is MORE transparent than a uniform LLM stamp, not less.
 
-**Operator-cadence hint during the validation chain:** once the operator has committed to the full-spec or hybrid path (at the start of `/launch` or at the Step 4/5 boundary), DO NOT pause again at every sub-stage to present new option menus. Execute through to the end of Step 5 and report in the Step 6 summary. Reserve further checkpoints for external-state surprises (parser errors, subagent crashes, quarantine-rate anomalies) or destructive actions.
+**Operator-cadence hint during the validation chain:** once the operator has committed to the full-spec or hybrid path (at the start of `launch` or at the Step 4/5 boundary), DO NOT pause again at every sub-stage to present new option menus. Execute through to the end of Step 5 and report in the Step 6 summary. Reserve further checkpoints for external-state surprises (parser errors, subagent crashes, quarantine-rate anomalies) or destructive actions.
 
 - Final bucket goes to `findings.final.jsonl`.
 
@@ -109,7 +109,7 @@ Print this structure:
 
   Final finding set:  N findings ready for review
 
-Next: type /review to triage in chat.
+Next: type review to triage in chat.
 ```
 
 ## Hard rules

@@ -36,7 +36,7 @@ Same rule — when an executor needs a credential it doesn't have in its prompt,
 
 - Platform: `HTB_USER`, `HTB_PASS`, `HTB_TOKEN`, `HACKERONE_TOKEN`
 - Notification: `SLACK_BOT_TOKEN`, `<SLACK_CHANNEL_ID>`
-- AI: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`
+- AI: `OPENAI_API_KEY` (when a project explicitly uses the OpenAI API)
 - Engagement: `FLAG` (when running benchmark suites that pass a flag via env)
 
 ## Anti-patterns

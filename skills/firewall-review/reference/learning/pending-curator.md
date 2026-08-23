@@ -1,7 +1,7 @@
 <!-- ../learning/pending-curator.md -->
 ---
 name: pending-curator
-description: Human-driven curator over `.claude/pending/` candidates. Exposes `fwrr pending <list|review|promote|reject|hold> [<id>]` for deterministic triage. No LLM.
+description: Human-driven curator over `.codex/pending/` candidates. Exposes `fwrr pending <list|review|promote|reject|hold> [<id>]` for deterministic triage. No LLM.
 ---
 
 # Pending Curator

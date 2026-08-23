@@ -24,7 +24,7 @@ skills/<skill-name>/
 skills/<skill-name>/
 ├── SKILL.md
 ├── README.md
-├── CLAUDE.md             # (Optional) auto-loaded context for this dir
+├── AGENTS.md             # (Optional) auto-loaded context for this dir
 ├── agents/               # Skill-specific agent role prompts
 ├── tools/                # Python utilities (with __init__.py)
 ├── templates/            # Templates and boilerplate (basic/, advanced/, examples/)
@@ -36,7 +36,7 @@ skills/<skill-name>/
 
 ### SKILL.md (required)
 
-Main file Claude reads. Must start with valid YAML frontmatter (see [FRONTMATTER.md](FRONTMATTER.md)). Hard cap **150 lines**, enforced by `scripts/skill_linter.py` in CI. Split into `reference/` at ~130.
+Main file Codex reads. Must start with valid YAML frontmatter (see [FRONTMATTER.md](FRONTMATTER.md)). Hard cap **150 lines**, enforced by `scripts/skill_linter.py` in CI. Split into `reference/` at ~130.
 
 ```markdown
 ---
@@ -52,9 +52,9 @@ description: What it does and when to use it
 
 Human-facing GitHub doc: overview, quick start, install, usage examples, features, troubleshooting, requirements, contributing.
 
-### CLAUDE.md (optional)
+### AGENTS.md (optional)
 
-Auto-loaded when Claude works in the skill's directory. Contains: skill overview, common tasks → reference file map, key file locations, critical conventions.
+Auto-loaded when Codex works in the skill's directory. Contains: skill overview, common tasks → reference file map, key file locations, critical conventions.
 
 ### tools/
 
@@ -84,7 +84,7 @@ Test outputs, reports, generated files. Keep with `.gitkeep` (`touch outputs/.gi
 **Directories** (lowercase + hyphens, gerund preferred): `processing-pdfs`, `analyzing-data`, `managing-aws-cloudtrail`.
 
 **Files**:
-- UPPERCASE for special files: `README.md`, `SKILL.md`, `CLAUDE.md`
+- UPPERCASE for special files: `README.md`, `SKILL.md`, `AGENTS.md`
 - UPPERCASE for reference docs: `API.md`, `EXAMPLES.md`
 - lowercase-with-hyphens for agents: `data-analyzer.md`
 - snake_case for Python: `data_processor.py`
@@ -120,7 +120,7 @@ For more, see [TROUBLESHOOTING.md](reference/TROUBLESHOOTING.md).
 
 ## Domain-Specific Organization
 
-For multi-domain skills, split reference by domain so Claude only loads what's relevant.
+For multi-domain skills, split reference by domain so Codex only loads what's relevant.
 
 ```
 bigquery-analytics/
@@ -185,5 +185,4 @@ echo "Structure created at $BASE"
 
 ## Reference
 
-- [Progressive Disclosure](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices#progressive-disclosure-patterns)
-- [Skill Structure Overview](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#skill-structure)
+- [Codex skills](https://developers.openai.com/codex/skills/)

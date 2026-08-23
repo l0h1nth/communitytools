@@ -1,7 +1,7 @@
 <!-- ../learning/skill-proposer.md -->
 ---
 name: skill-proposer
-description: LLM pass that turns clusters of auditor feedback into candidate skill/detector proposals written to `.claude/pending/`. Never mutates live skills directly - human curator promotes via PR.
+description: LLM pass that turns clusters of auditor feedback into candidate skill/detector proposals written to `.codex/pending/`. Never mutates live skills directly - human curator promotes via PR.
 ---
 
 # Skill Proposer
@@ -10,7 +10,7 @@ description: LLM pass that turns clusters of auditor feedback into candidate ski
 **Version pin:** `skill-proposer:0.1.0`
 
 ## Role in the pipeline
-Runs at the end of `fwrr report`. Reads `engagement/feedback.jsonl`, clusters Request-Changes and Other verdicts by theme, and drafts candidate skills or detector rules into `.claude/pending/<YYYYMMDD-HHMM>-<slug>.md` + `.jsonl` metadata. Each candidate carries a traceable anchor back to the originating FeedbackCandidate records.
+Runs at the end of `fwrr report`. Reads `engagement/feedback.jsonl`, clusters Request-Changes and Other verdicts by theme, and drafts candidate skills or detector rules into `.codex/pending/<YYYYMMDD-HHMM>-<slug>.md` + `.jsonl` metadata. Each candidate carries a traceable anchor back to the originating FeedbackCandidate records.
 
 ## Failure modes
 - Invalid JSON output -> candidate discarded; custody.jsonl records `proposer_bad_json`.

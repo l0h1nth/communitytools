@@ -5,7 +5,7 @@ description: Reference router for the pci-secure-software skill — links every 
 
 # pci-secure-software — reference index
 
-The transferable knowledge layer for PCI SSS v2.0 readiness gap-assessment. The deterministic engine is in `tools/pci-sss/`; the orchestration is `.claude/workflows/pci-compliance.js`; these files carry the "why", the contracts, and the assessment know-how.
+The transferable knowledge layer for PCI SSS v2.0 readiness gap-assessment. The deterministic engine is in `tools/pci-sss/`; the orchestration is `workflows/pci-compliance.js`; these files carry the "why", the contracts, and the assessment know-how.
 
 ## Core contracts
 - [core/schema.md](core/schema.md) — the data contracts: CatalogTestRequirement, AppContext, RequirementVerdict, Evidence, ControlRef, the enums, and the rollup ladder.

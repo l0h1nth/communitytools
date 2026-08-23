@@ -3,7 +3,7 @@
 The completion report documents the final state of a solved HTB challenge. Written in step 11 of the workflow to `reports/completion-report.md`, this report serves as:
 - Input for Slack completion notification (step 12)
 - Archive for future reference
-- Source for skill improvement feedback (via `/skill-update`)
+- Source for skill improvement feedback (via `$skill-update`)
 
 ---
 
@@ -11,7 +11,7 @@ The completion report documents the final state of a solved HTB challenge. Writt
 
 **Path**: `{OUTPUT_DIR}/reports/completion-report.md`
 
-**Timing**: After coordinator completes, before `/skill-update` runs (step 11)
+**Timing**: After coordinator completes, before `$skill-update` runs (step 11)
 
 **Source Data**:
 - `challenge-meta.json` — Challenge metadata (difficulty, OS, category)
@@ -155,7 +155,7 @@ mkdir -p {OUTPUT_DIR}/reports
 ### Parent orchestrator uses this report (HTB workflow step 8)
 After each coordinator completes, the **parent orchestrator** reads this report and:
 
-1. **Skill Update** — passes techniques, lessons learned, and failed approaches to `/skill-update`
+1. **Skill Update** — passes techniques, lessons learned, and failed approaches to `$skill-update`
    - **Techniques** used → update relevant skill (e.g., injection, server-side)
    - **Lessons** → add to cheat sheets / quickstart guides
    - **Failed approaches** → document in skill reference (why they failed)
@@ -165,7 +165,7 @@ After each coordinator completes, the **parent orchestrator** reads this report 
    - Flag status (from Statistics)
    - Attack Chain (as narrative)
    - Techniques Used (as bullet list for "Key Techniques")
-   - `/skill-update` output (for "Skills Updated")
+   - `$skill-update` output (for "Skills Updated")
 
 ---
 
@@ -188,7 +188,7 @@ See `slack-notifications.md` for a full example of how this report flows into th
 
 ## Timing Considerations
 
-**When to write**: After coordinator returns but before `/skill-update` runs.
+**When to write**: After coordinator returns but before `$skill-update` runs.
 
 **Required inputs**:
 - Challenge must be solved (both flags captured, or explicitly marked as failed)

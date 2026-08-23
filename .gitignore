@@ -84,6 +84,12 @@ benchmarks/bountybench/results/
 *.json
 !.claude-plugin/plugin.json
 !.claude-plugin/marketplace.json
+!.codex-plugin/plugin.json
+!.codex-plugin/marketplace.json
+!.codex/
+!.codex/**
+!.agents/
+!.agents/**
 !plugins/**/.claude-plugin/plugin.json
 !mcp/**/*.json
 # Skill compliance catalogs are source-of-truth data, not engagement output — keep them tracked.

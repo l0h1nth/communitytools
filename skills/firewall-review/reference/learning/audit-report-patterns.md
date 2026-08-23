@@ -7,7 +7,7 @@ source: real-engagement-distillation
 
 # Nipper-class audit report — layout & content patterns
 
-The following patterns are distilled from industry-standard commercial firewall audit reports (Nipper Studio family) and must be reproduced by our `/report` pipeline when the engagement is to be handed to a client. These are transferable techniques — no client names, device hostnames, or rule content are captured.
+The following patterns are distilled from industry-standard commercial firewall audit reports (Nipper Studio family) and must be reproduced by our `report` pipeline when the engagement is to be handed to a client. These are transferable techniques — no client names, device hostnames, or rule content are captured.
 
 ## Report section ordering (canonical)
 
@@ -137,4 +137,4 @@ Each best-practice category (Authentication / Rule Broadness / Services / Struct
 - Add **config-audit module**: password policy, banner messages, admin accounts — not just filter rules.
 - Add **filtering complexity module**: object-group hygiene + rule-comment discipline.
 - Report structure must be **TOC-hyperlinked** for PDF navigation; page numbers and anchors.
-- Save every engagement's *patterns* (not data) to `.claude/pending/` so the curator learning loop can surface recurring real-world issues (e.g. "3 of last 5 engagements flagged UNUSED-OBJECT-GROUPS > 50% of defined groups — detector severity should auto-upgrade to Medium when ratio > 50%").
+- Save every engagement's *patterns* (not data) to `.codex/pending/` so the curator learning loop can surface recurring real-world issues (e.g. "3 of last 5 engagements flagged UNUSED-OBJECT-GROUPS > 50% of defined groups — detector severity should auto-upgrade to Medium when ratio > 50%").

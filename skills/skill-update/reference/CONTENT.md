@@ -1,10 +1,10 @@
 # Content Writing Guidelines
 
-How to write effective content for Claude skills.
+How to write effective content for Codex skills.
 
 ## Core Principles
 
-1. **Concise** — challenge every token. Skip explanations Claude already has (what PDFs are, what `pip` does, importing libraries). Spend tokens on domain knowledge, project conventions, file locations, custom workflows.
+1. **Concise** — challenge every token. Skip explanations Codex already has (what PDFs are, what `pip` does, importing libraries). Spend tokens on domain knowledge, project conventions, file locations, custom workflows.
 
 2. **Third person** — descriptions are injected into system prompts.
    - Good: "Processes Excel files and generates reports"
@@ -126,7 +126,7 @@ For reference files > 100 lines, include a contents list at the top so partial r
 
 ### Solve, don't punt
 
-Handle errors so the script makes progress; don't fail silently and expect Claude to figure it out.
+Handle errors so the script makes progress; don't fail silently and expect Codex to figure it out.
 
 ```python
 def process_file(path):
@@ -173,7 +173,7 @@ Run `analyze_form.py` to extract fields:
 
 ## Content Checklist
 
-**Quality**: concise, assumes Claude is smart, third person, consistent terminology, no time-sensitive content, clear workflows with checklists, freedom matches task.
+**Quality**: concise, assumes Codex is capable, third person, consistent terminology, no time-sensitive content, clear workflows with checklists, freedom matches task.
 
 **Structure**: quick start present, workflows have checklists, examples concrete, progressive disclosure used, references one level deep, long files have contents list.
 
@@ -183,6 +183,4 @@ Run `analyze_form.py` to extract fields:
 
 ## Reference
 
-- [Concise is Key](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices#concise-is-key)
-- [Degrees of Freedom](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices#set-appropriate-degrees-of-freedom)
-- [Common Patterns](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices#common-patterns)
+- [Codex skills](https://developers.openai.com/codex/skills/)

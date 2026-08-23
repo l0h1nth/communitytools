@@ -1,6 +1,6 @@
 # Slack Notifications Reference
 
-Slack messages notify the team when a challenge starts or when it's solved. Both messages are sent to the configured Slack channel via `python3 .claude/tools/slack-send.py`.
+Slack messages notify the team when a challenge starts or when it's solved. Both messages are sent to the configured Slack channel via `python3 tools/slack-send.py`.
 
 ## Challenge Started Notification
 
@@ -96,10 +96,10 @@ python3 tools/slack-send.py \
 - If either is `NOT_SET`, skip Slack notifications silently
 
 ### Completion Report Source
-The **coordinator** sends this notification as Phase 3 of its mission (see `skills/coordination/reference/spawning-recipes.md`), after running `/skill-update`.
+The **coordinator** sends this notification as Phase 3 of its mission (see `skills/coordination/reference/spawning-recipes.md`), after running `$skill-update`.
 - Build notifications from `{OUTPUT_DIR}/reports/completion-report.md`
 - Extract stats from `{OUTPUT_DIR}/stats.json`
-- Include skill updates from the `/skill-update` output just completed
+- Include skill updates from the `$skill-update` output just completed
 
 ### Narrative Guidelines
 - Write as **connected story**, not disconnected steps

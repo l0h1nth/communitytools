@@ -1,6 +1,6 @@
 ---
 name: vendor-sniff
-description: Content-signature firewall-config classifier. Reads the first 4 KiB of any file dropped into Pre-requisites/ and matches a priority-ordered set of regex / JSON-shape signatures to identify one of 8 vendor formats (PAN-OS XML, PAN-OS set, FortiGate, Cisco ASA, Cisco IOS, Azure NSG, AWS SG, iptables) — or returns "unknown" with confidence 0.0. Drives flat-folder vendor routing in /launch so operators no longer maintain per-vendor sub-directories.
+description: Content-signature firewall-config classifier. Reads the first 4 KiB of any file dropped into Pre-requisites/ and matches a priority-ordered set of regex / JSON-shape signatures to identify one of 8 vendor formats (PAN-OS XML, PAN-OS set, FortiGate, Cisco ASA, Cisco IOS, Azure NSG, AWS SG, iptables) — or returns "unknown" with confidence 0.0. Drives flat-folder vendor routing in launch so operators no longer maintain per-vendor sub-directories.
 ---
 
 # Vendor Sniff (auto-detection)
@@ -9,7 +9,7 @@ description: Content-signature firewall-config classifier. Reads the first 4 KiB
 **Version pin:** (see ../VERSIONS.md)
 
 ## Role in the pipeline
-Fires inside `/launch` ([`lib/fwrr/commands/launch.py`](https://github.com/ipunithgowda/firewall-review/blob/main/lib/fwrr/commands/launch.py)) before any parser runs. For every file in `Pre-requisites/` (flat layout), `detect_vendor(path)` is called and its return value picks which parser module to instantiate. Files scoring below the 0.75 confidence floor are skipped with an actionable hint to the operator.
+Fires inside `launch` ([`lib/fwrr/commands/launch.py`](https://github.com/ipunithgowda/firewall-review/blob/main/lib/fwrr/commands/launch.py)) before any parser runs. For every file in `Pre-requisites/` (flat layout), `detect_vendor(path)` is called and its return value picks which parser module to instantiate. Files scoring below the 0.75 confidence floor are skipped with an actionable hint to the operator.
 
 ## What it does
 Reads `_HEAD_BYTES = 4096` of the file (`raw = path.read_bytes()[:_HEAD_BYTES]`), best-effort decodes UTF-8, then runs signature checks in **most-specific first** priority order. The first match wins — there is no scoring across signatures. JSON vendors (Azure NSG, AWS SG) get a special path: try parsing the 4 KiB head as JSON first, and if that fails fall back to reading the entire file (`_try_json_load`), because JSON exports rarely fit in 4 KiB.
@@ -34,7 +34,7 @@ Anything else returns `("unknown", 0.0)`. Empty / unreadable / whitespace-only f
 - `Tuple[str, float]` — `(vendor, confidence)`. Vendor is one of: `pan-os-xml`, `pan-os-set`, `azure-nsg`, `aws-sg`, `fortigate`, `cisco-asa`, `cisco-ios`, `iptables`, `unknown`. Confidence is in `[0.0, 1.0]`.
 
 ## Gotchas / failure modes
-- **0.75 floor in caller, not detector.** `detect_vendor` returns whatever it computes; the cutoff (`_SNIFF_CONFIDENCE_FLOOR = 0.75` in [`lib/fwrr/commands/launch.py`](https://github.com/ipunithgowda/firewall-review/blob/main/lib/fwrr/commands/launch.py)) is enforced by `/launch`, which routes sub-floor files to a `skipped` list with a hint suggesting either a vendor-naming hint (`*-fortigate.conf`) or the legacy per-vendor folder layout.
+- **0.75 floor in caller, not detector.** `detect_vendor` returns whatever it computes; the cutoff (`_SNIFF_CONFIDENCE_FLOOR = 0.75` in [`lib/fwrr/commands/launch.py`](https://github.com/ipunithgowda/firewall-review/blob/main/lib/fwrr/commands/launch.py)) is enforced by `launch`, which routes sub-floor files to a `skipped` list with a hint suggesting either a vendor-naming hint (`*-fortigate.conf`) or the legacy per-vendor folder layout.
 - **OSError swallowed.** `path.read_bytes()` failures return `("unknown", 0.0)` rather than raising — a missing-file bug becomes a silent skip.
 - **JSON fallback reads the whole file.** `_try_json_load` falls back to `path.read_text(...)` of the entire file when the 4 KiB head fails to parse — multi-MB JSON exports are loaded fully into memory.
 - **No content-validation beyond the regex.** A FortiGate config wrapped in HTML comments could falsely match; the sniff is signature-based, not parser-based.
@@ -42,5 +42,5 @@ Anything else returns `("unknown", 0.0)`. Empty / unreadable / whitespace-only f
 
 ## When to modify
 - **New vendor support:** add a `_VENDOR_RE` (or JSON `_is_<vendor>` helper) and an ordered branch in `detect_vendor`. Place above any vendor whose signature it could overlap with (e.g. a new XML vendor must sit below or differentiate from the PAN-OS XML branch).
-- **Confidence retuning:** edit the literal score in the matching branch. Be aware `/launch` enforces 0.75 — anything below is silently skipped.
+- **Confidence retuning:** edit the literal score in the matching branch. Be aware `launch` enforces 0.75 — anything below is silently skipped.
 - **CLI:** `python -m fwrr.parsers._sniff <path...>` prints `<path>\t<vendor>\t<confidence>` and exits 1 if any file scored below 0.75.

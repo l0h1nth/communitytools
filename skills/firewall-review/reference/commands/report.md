@@ -3,7 +3,7 @@ name: report
 description: Render a consolidated customer-review Excel workbook, optional audit-grade PDF, and chain-of-custody manifest from approved findings. Gated on ≥1 approve in feedback.jsonl.
 ---
 
-# /report — Render deliverables
+# report — Render deliverables
 
 No arguments. Operates on the most recent engagement.
 
@@ -13,10 +13,10 @@ No arguments. Operates on the most recent engagement.
 
 ### Step 1 — Preflight
 
-- Check `findings.final.jsonl` exists. If not, error: "run /launch first".
+- Check `findings.final.jsonl` exists. If not, error: "run launch first".
 - Check `feedback.jsonl` exists and has at least one `"decision":"approve"` entry.
-  - If missing AND the operator has explicitly requested the report without running `/review` (e.g. asked for "the report now" / "skip review, render"), synthesize a batch-approve `feedback.jsonl` — one entry per finding with `decision: "approve"`, `decided_by: <engagement.lead_assessor>`, `mode: "batch-approve-at-report"`, and `reason` noting that interactive review was skipped by operator choice. This preserves the audit trail (the mode field makes the path explicit) and satisfies the `/report` gate. Print a one-line notice in chat so the operator sees it: "Synthesized batch-approve feedback.jsonl; audit trail records `mode: batch-approve-at-report`."
-  - If missing AND the operator did NOT ask to skip `/review`, error: "run /review and approve at least one finding first".
+  - If missing AND the operator has explicitly requested the report without running `review` (e.g. asked for "the report now" / "skip review, render"), synthesize a batch-approve `feedback.jsonl` — one entry per finding with `decision: "approve"`, `decided_by: <engagement.lead_assessor>`, `mode: "batch-approve-at-report"`, and `reason` noting that interactive review was skipped by operator choice. This preserves the audit trail (the mode field makes the path explicit) and satisfies the `report` gate. Print a one-line notice in chat so the operator sees it: "Synthesized batch-approve feedback.jsonl; audit trail records `mode: batch-approve-at-report`."
+  - If missing AND the operator did NOT ask to skip `review`, error: "run review and approve at least one finding first".
 - Verify `scoping-questionnaire.yaml` has non-empty `engagement.client`, `engagement.lead_assessor`, and `regulatory_overlay`. If any are empty, ASK the operator to fill them before rendering — these fields appear on the PDF cover page and in the appendix.
 
 ### Step 2 — Render deliverables
@@ -45,7 +45,7 @@ Do not advertise a non-existent renderer flag. If the reference implementation d
 
 Run: `python3.11 scripts/propose-skills.py <engagement-dir>`
 
-If ≥3 feedback entries share the same detector + proposed severity adjustment, the script writes a PendingCandidate YAML to `.claude/pending/<slug>.yaml` for curator review. Report the candidate count in chat.
+If ≥3 feedback entries share the same detector + proposed severity adjustment, the script writes a PendingCandidate YAML to `.codex/pending/<slug>.yaml` for curator review. Report the candidate count in chat.
 
 ### Step 4 — Confirm + open
 
@@ -59,7 +59,7 @@ Print:
   Manifest:  deliverables/manifest.json
 
   Learning candidates proposed: N
-    (review with /pending list, promote with /pending promote <id>)
+    (review with pending list, promote with pending promote <id>)
 
 Open:
   open <engagement-dir>/deliverables/report.pdf

@@ -5,7 +5,7 @@ description: Canonical data contracts for the pci-secure-software pipeline — t
 
 # Core Schema
 
-The stable type contract that decouples the catalog (source of truth) from the workflow (assessment) from the tools (deterministic gates) from the report. JSON throughout. A change to any field name here ripples to `.claude/workflows/pci-compliance.js`, every `tools/pci-sss/*.py`, and `formats/transilience-report-style/compliance-report.md`.
+The stable type contract that decouples the catalog (source of truth) from the workflow (assessment) from the tools (deterministic gates) from the report. JSON throughout. A change to any field name here ripples to `workflows/pci-compliance.js`, every `tools/pci-sss/*.py`, and `formats/transilience-report-style/compliance-report.md`.
 
 ## 1. `CatalogTestRequirement` (one per lettered Test Requirement; the deterministic enumeration source)
 

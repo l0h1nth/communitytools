@@ -1,6 +1,6 @@
 # YAML Frontmatter Reference
 
-How to write valid YAML frontmatter for Claude skills.
+How to write valid YAML frontmatter for Codex skills.
 
 ## Contents
 - Requirements
@@ -23,7 +23,7 @@ description: What the skill does and when to use it
 
 - **Max 64 chars**
 - **Allowed**: lowercase letters, digits, hyphens
-- **Forbidden**: XML tags, reserved words ("anthropic", "claude"), uppercase, underscores, spaces
+- **Forbidden**: XML tags, uppercase, underscores, spaces, or provider-specific branding in a skill name
 - **Convention**: gerund form (verb + -ing), specific and descriptive
 
 **Good**:
@@ -43,8 +43,8 @@ name: ProcessingPDFs      # uppercase
 name: PDF Processing      # spaces
 name: helper              # too vague
 name: utils               # too generic
-name: anthropic-helper    # reserved word
-name: claude-tools        # reserved word
+name: Security Tools       # uppercase and spaces
+name: security_tools       # underscore
 ```
 
 ## Description field
@@ -193,5 +193,4 @@ Read current frontmatter → check against rules → identify gaps (missing WHEN
 
 ## Reference
 
-- [Anthropic Skills Overview](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#skill-structure)
-- [Skills Best Practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)
+- [Codex skills](https://developers.openai.com/codex/skills/)

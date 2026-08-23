@@ -27,5 +27,5 @@ Cleartext, legacy, or unauthenticated protocols facilitate credential theft, man
 - ISO/IEC 27001:2022 — `A.8.21` (security of network services)
 
 ## v0.2 / v0.3 plans
-- v0.2: allow auditors to extend the risky-service catalogue via `.claude/pending/` proposals (learning loop).
+- v0.2: allow auditors to extend the risky-service catalogue via `.codex/pending/` proposals (learning loop).
 - v0.3: per-asset criticality weighting — a risky service toward a PCI-scoped asset escalates to Critical automatically.

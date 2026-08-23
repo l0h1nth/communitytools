@@ -21,27 +21,31 @@ The parent-orchestrator's job. Runs in the main conversation context. Owns the q
 - Queue-based: spawn min(cap, total) at T0; each coordinator solves one target then exits; spawn the next from the queue when one completes.
 - Each coordinator gets its own `OUTPUT_DIR`.
 
-Spawn template:
+Delegation template:
 
-```python
-coordinator_role = Read("skills/coordination/SKILL.md")
-Agent(
-    name=f"coordinator-{target_tag}",
-    description=f"Coordinator: {target_tag}",
-    prompt=f"{coordinator_role}\n\nOUTPUT_DIR: {output_dir}\nTARGET: {target}\nSCOPE: {scope}\n",
-    run_in_background=True,
-)
+```text
+Delegate to the custom Codex agent `coordinator`:
+
+Read skills/coordination/SKILL.md first.
+OUTPUT_DIR: <prepared output directory>
+TARGET: <one target>
+SCOPE: <explicit scope>
+SKILLS_HINT: <one or two likely skills>
+Return PHASE3_SUMMARY when complete.
 ```
+
+Use Codex's parallel delegation for independent targets, then wait for each coordinator
+before running the parent-owned Phase 3 steps.
 
 ## Phase 3 — runs after every coordinator completes
 
-The coordinator does NOT run /skill-update or Slack. The orchestrator does, every time.
+The coordinator does NOT run $skill-update or Slack. The orchestrator does, every time.
 
 For each completed coordinator:
 
 1. **Read** the coordinator's PHASE3_SUMMARY block from its return.
 2. **Verify outputs** — `{OUTPUT_DIR}/reports/completion-report.md` and `{OUTPUT_DIR}/stats.json` exist.
-3. **Run `/skill-update`** with the techniques + lessons from PHASE3_SUMMARY. The skill-update will reject any addition that re-introduces challenge-specific lore.
+3. **Run `$skill-update`** with the techniques + lessons from PHASE3_SUMMARY. The skill-update will reject any addition that re-introduces challenge-specific lore.
 4. **Send Slack notification** if `SLACK_BOT_TOKEN` and the channel ID are both set:
    - Compose per platform-specific notification format if one applies.
    - Send via `python3 tools/slack-send.py`.
@@ -68,7 +72,7 @@ If the coordinator reports "submission blocked" but captured the flags: this is 
 
 ## Anti-Patterns
 
-- Letting the coordinator call `/skill-update` to "save the orchestrator a step."
+- Letting the coordinator call `$skill-update` to "save the orchestrator a step."
 - Asking the user before trying `env-reader.py`.
 - Running multiple coordinators against the same target.
 - Skipping the queue and spawning all coordinators at once for "speed."

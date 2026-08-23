@@ -13,7 +13,7 @@ The framework version is load-bearing. A verdict that cites a control under the 
 | Source document | `PCI-Secure-Software-Standard-v2.0.pdf` | sha256 `7c71af6db6ae5bd2d4aa8117471cef0fbb4ff1b9dde91ed0eee06bfb7b879c40` (pinned in the catalog `meta.source_sha256`). |
 | Catalog | `catalog_schema_version` `1.0.0` | `reference/catalog/pci-sss-v2.0.json`. Page offset: PDF page = printed page + 4 (document body). |
 | Tooling | `tools/pci-sss/` v1 | `validate_catalog.py`, `applicability.py`, `citation_verify.py`, `aggregate.py`, `coverage_gate.py`, `build_catalog.py`. |
-| Workflow | `pci-compliance` | `.claude/workflows/pci-compliance.js`. |
+| Workflow | `pci-compliance` | `workflows/pci-compliance.js`. |
 
 ## Related PCI publications (not pinned here, examined at assessment time)
 - PCI Secure Software Standard — Sensitive Asset Identification (companion, mandatory for scoping).

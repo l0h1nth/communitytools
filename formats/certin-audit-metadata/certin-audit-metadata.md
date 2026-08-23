@@ -14,7 +14,7 @@ holds only the controlled vocabularies and the intermediate-JSON schema — no t
 
 Produced by:
 - `tools/certin_metadata_build.py` — deterministic builder (stdlib only; no LLM authors the bytes).
-- `.claude/workflows/certin-export.js` — adds AI judgment (audit-type, sector/sub-sector, standards,
+- `workflows/certin-export.js` — adds AI judgment (audit-type, sector/sub-sector, standards,
   per-finding Attributing Factor, challenges) then blind-verifies.
 - auto-run (placeholders only) by `pentest-engagement` finalize when the scope sets `certin_export: true`.
 
@@ -52,8 +52,7 @@ generated_from}` (clockless / deterministic).
   glob `**/artifacts/validated/*.json` keeping only `verdict ∈ {VALID, REPAIRED}`.
 - **Administrative fields** (AMBAK, auditor identity, auditee category/sector, reason, State/UT,
   dates, follow-up counts, manpower roster) come from `input/certin.json`.
-- **Derived**: audit type (engagement kind/asset type; overridable); AI-assisted = `"Yes — Claude
-  Opus 4.8 …"`; standards (Classify infers from coverage + methodology); severity mapped
+- **Derived**: audit type (engagement kind/asset type; overridable); AI-assisted = `"Yes — Codex Opus 4.8 …"`; standards (Classify infers from coverage + methodology); severity mapped
   (`Info → Informational`); occurrence = `len(finding.affected)` (≥1); Attributing Factor = a
   CWE-default table (a CVE ⇒ "Vulnerable Software Versions"), overridden by Classify per finding;
   `#vulns in FIRST audit` = number of findings.

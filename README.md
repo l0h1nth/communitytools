@@ -5,9 +5,9 @@
 [![Built by Transilience](https://img.shields.io/badge/Built%20by-Transilience.ai-4A90D9)](https://www.transilience.ai)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![GitHub stars](https://img.shields.io/github/stars/transilienceai/communitytools)](https://github.com/transilienceai/communitytools/stargazers)
-[![Claude AI](https://img.shields.io/badge/Powered%20by-Claude%20AI-blue)](https://claude.ai)
+[![OpenAI Codex](https://img.shields.io/badge/Powered%20by-OpenAI%20Codex-blue)](https://developers.openai.com/codex/)
 
-**Open-source Claude Code skills and agents for AI-powered penetration testing, bug bounty hunting, AI threat testing, and security reconnaissance — from the team at [Transilience.ai](https://www.transilience.ai)**
+**Open-source Codex skills and agents for AI-powered penetration testing, bug bounty hunting, AI threat testing, and security reconnaissance — from the team at [Transilience.ai](https://www.transilience.ai)**
 
 [Quick Start](#-quick-start) | [Skills](#-skills) | [Architecture](#-architecture) | [Contributing](CONTRIBUTING.md) | [Website](https://www.transilience.ai)
 
@@ -27,11 +27,11 @@ We built an autonomous pentesting agent that scores **100% (104/104)** on a publ
 
 ## Overview
 
-**Transilience AI Community Tools** is a consolidated Claude Code security testing suite — **26 skills** and **3 tool integrations** that cover the full penetration testing lifecycle from reconnaissance to reporting. Agent roles (coordinator, executor, validator) are defined in `skills/coordination/` with reference material in `skills/coordination/reference/`, and spawned dynamically via `Agent(prompt=...)`.
+**Transilience AI Community Tools** is a Codex-compatible security testing suite — **43 skills** and **3 tool integrations** that cover the full penetration testing lifecycle from reconnaissance to reporting. Agent roles (coordinator, executor, skeptic, validator) are defined in `skills/coordination/` and wired to Codex custom agents in `.codex/agents/`.
 
 ### Why Choose Transilience Community Tools?
 
-- **AI-Powered Automation** — Claude coordinates intelligent security testing workflows
+- **AI-Powered Automation** — Codex coordinates intelligent security testing workflows
 - **Complete OWASP Coverage** — 100% OWASP Top 10 + OWASP LLM Top 10
 - **Professional Reporting** — CVSS 4.0 (primary; v3.1/v3.0/v2.0 fallback), CWE, MITRE ATT&CK, Transilience-branded PDF reports
 - **Playwright Integration** — Browser automation for client-side vulnerability testing
@@ -44,20 +44,20 @@ We built an autonomous pentesting agent that scores **100% (104/104)** on a publ
 
 ### Local Setup
 
-- **Claude Code** — [Install Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code/overview)
+- **Codex CLI** — [Install Codex](https://developers.openai.com/codex/cli/)
 - **Playwright** — Required for client-side testing, HackTheBox/HackerOne automation, and browser-based evidence capture. Install via: `npm install -g @playwright/mcp && npx playwright install chromium`
 - **Python 3** — Required for tools (`env-reader.py`, `nvd-lookup.py`, `slack-send.py`)
 - **Kali Linux tools** (optional) — nmap, gobuster, ffuf, sqlmap, testssl, etc. Only needed for network/infrastructure testing
 
 ### Docker Setup (Recommended)
 
-A single script spins up a Kali Linux container with Claude Code, Playwright (headed via Xvfb), and all Kali security tools pre-installed:
+A single script spins up a Kali Linux container with Codex, Playwright (headed via Xvfb), and all Kali security tools pre-installed:
 
 ```bash
-bash scripts/kali-claude-setup.sh projects/pentest
+bash scripts/kali-codex-setup.sh projects/pentest
 ```
 
-This builds a Docker image with Kali Rolling + Node.js + Claude Code + Playwright + Chromium, mounts the project workspace, and launches Claude Code with `--dangerously-skip-permissions`. Use `--rebuild` to force a fresh image build.
+This builds a Docker image with Kali Rolling + Node.js + Codex + Playwright + Chromium, mounts the project workspace, and launches Codex in the project. Use `--rebuild` to force a fresh image build.
 
 ---
 
@@ -70,21 +70,21 @@ git clone https://github.com/transilienceai/communitytools.git
 cd communitytools/projects/pentest
 ```
 
-### 2. Open Claude Code and run skills
+### 2. Open Codex and run skills
 
 ```bash
-claude    # Launch Claude Code from the projects/pentest directory
+codex     # Launch Codex from the projects/pentest directory
 ```
 
-Then use slash commands inside the Claude session:
+Then select skills with `/skills` or mention them with `$`:
 
 ```
-Pentest https://target.com            # Full penetration test (skills/coordination/)
-/hackthebox                          # HackTheBox challenge automation
-/hackerone                           # Bug bounty workflow
-/techstack-identification            # Passive tech stack recon
-/reconnaissance target.com           # Attack surface mapping
-/source-code-scanning ./app          # Static code analysis
+Run an authorized pentest against https://target.com using $pentest-engagement
+$hackthebox                          # HackTheBox challenge automation
+$hackerone                           # Bug bounty workflow
+$techstack-identification            # Passive tech stack recon
+$reconnaissance target.com           # Attack surface mapping
+$source-code-scanning ./app          # Static code analysis
 ```
 
 ---
@@ -93,60 +93,60 @@ Pentest https://target.com            # Full penetration test (skills/coordinati
 
 All canonical skill and tool definitions live at the **repo root** (`skills/`, `tools/`). Each project under `projects/` symlinks only the ones it needs — see [Repository Structure](#repository-structure) for details.
 
-Agent roles (coordinator, executor, validator) are defined in `skills/coordination/` with reference material in `skills/coordination/reference/`, spawned dynamically via `Agent(prompt=...)`.
+Agent roles (coordinator, executor, skeptic, validator) are defined in `skills/coordination/` and exposed as Codex custom agents in `.codex/agents/`. Ask Codex to delegate bounded work to them in parallel.
 
-### Skills by Category (26)
+### Selected Skills by Category (26 of 43)
 
 #### Vulnerability Testing (10)
 
 | Skill | Coverage |
 |-------|----------|
-| `/injection` | SQL, NoSQL, OS Command, SSTI, XXE, LDAP/XPath |
-| `/client-side` | XSS (Reflected/Stored/DOM), CSRF, Clickjacking, CORS, Prototype Pollution |
-| `/server-side` | SSRF, HTTP Smuggling, Path Traversal, File Upload, Deserialization, Host Header |
-| `/authentication` | Auth Bypass, JWT, OAuth, Password Attacks, 2FA Bypass, CAPTCHA Bypass |
-| `/api-security` | GraphQL, REST API, WebSockets, Web LLM |
-| `/web-app-logic` | Business Logic, Race Conditions, Access Control, Cache Poisoning/Deception, IDOR |
-| `/cloud-containers` | AWS, Azure, GCP, Docker, Kubernetes |
-| `/system` | Active Directory, Privilege Escalation (Linux/Windows), Exploit Development |
-| `/infrastructure` | Port Scanning, DNS, MITM, VLAN Hopping, IPv6, SMB/NetBIOS |
-| `/social-engineering` | Phishing, Pretexting, Vishing, Physical Security |
+| `$injection` | SQL, NoSQL, OS Command, SSTI, XXE, LDAP/XPath |
+| `$client-side` | XSS (Reflected/Stored/DOM), CSRF, Clickjacking, CORS, Prototype Pollution |
+| `$server-side` | SSRF, HTTP Smuggling, Path Traversal, File Upload, Deserialization, Host Header |
+| `$authentication` | Auth Bypass, JWT, OAuth, Password Attacks, 2FA Bypass, CAPTCHA Bypass |
+| `$api-security` | GraphQL, REST API, WebSockets, Web LLM |
+| `$web-app-logic` | Business Logic, Race Conditions, Access Control, Cache Poisoning/Deception, IDOR |
+| `$cloud-containers` | AWS, Azure, GCP, Docker, Kubernetes |
+| `$system` | Active Directory, Privilege Escalation (Linux/Windows), Exploit Development |
+| `$infrastructure` | Port Scanning, DNS, MITM, VLAN Hopping, IPv6, SMB/NetBIOS |
+| `$social-engineering` | Phishing, Pretexting, Vishing, Physical Security |
 
 #### Reconnaissance (3)
 
 | Skill | Purpose |
 |-------|---------|
-| `/reconnaissance` | Subdomain discovery, port scanning, endpoint enumeration, API discovery, attack surface mapping |
-| `/osint` | Repository enumeration, secret scanning, git history analysis, employee footprint |
-| `/techstack-identification` | Passive tech stack inference across 17 intelligence domains |
+| `$reconnaissance` | Subdomain discovery, port scanning, endpoint enumeration, API discovery, attack surface mapping |
+| `$osint` | Repository enumeration, secret scanning, git history analysis, employee footprint |
+| `$techstack-identification` | Passive tech stack inference across 17 intelligence domains |
 
 #### Specialized (5)
 
 | Skill | Purpose |
 |-------|---------|
-| `/ai-threat-testing` | OWASP LLM Top 10 — prompt injection, model extraction, data poisoning, supply chain |
-| `/blockchain-security` | Smart contract security, EVM storage, delegatecall, CREATE/CREATE2, DeFi exploits |
-| `/cve-poc-generator` | CVE research, NVD lookup, safe Python PoC generation, vulnerability reports |
-| `/dfir` | Digital forensics, incident response, Windows event logs, PCAP analysis, AD attack detection |
-| `/source-code-scanning` | SAST — OWASP Top 10, CWE Top 25, dependency CVEs, hardcoded secrets |
+| `$ai-threat-testing` | OWASP LLM Top 10 — prompt injection, model extraction, data poisoning, supply chain |
+| `$blockchain-security` | Smart contract security, EVM storage, delegatecall, CREATE/CREATE2, DeFi exploits |
+| `$cve-poc-generator` | CVE research, NVD lookup, safe Python PoC generation, vulnerability reports |
+| `$dfir` | Digital forensics, incident response, Windows event logs, PCAP analysis, AD attack detection |
+| `$source-code-scanning` | SAST — OWASP Top 10, CWE Top 25, dependency CVEs, hardcoded secrets |
 
 #### Platform Integrations (2)
 
 | Skill | Purpose |
 |-------|---------|
-| `/hackerone` | Scope CSV parsing, parallel asset testing, PoC validation, platform-ready submissions |
-| `/hackthebox` | Playwright-based login, challenge browsing, VPN management, automated solving |
+| `$hackerone` | Scope CSV parsing, parallel asset testing, PoC validation, platform-ready submissions |
+| `$hackthebox` | Playwright-based login, challenge browsing, VPN management, automated solving |
 
 #### Tooling (6)
 
 | Skill | Purpose |
 |-------|---------|
-| `/essential-tools` | Burp Suite, Playwright automation, methodology, reporting standards |
-| `/patt-fetcher` | On-demand payload extraction from PayloadsAllTheThings |
-| `/script-generator` | Optimized, syntax-validated script generation |
+| `$essential-tools` | Burp Suite, Playwright automation, methodology, reporting standards |
+| `$patt-fetcher` | On-demand payload extraction from PayloadsAllTheThings |
+| `$script-generator` | Optimized, syntax-validated script generation |
 | `formats/transilience-report-style` | Transilience-branded PDF report generation (ReportLab) |
-| `/github-workflow` | Git branching, commits, PRs, issues, code review |
-| `/skill-update` | Skill scaffolding, validation, GitHub workflow automation |
+| `$github-workflow` | Git branching, commits, PRs, issues, code review |
+| `$skill-update` | Skill scaffolding, validation, GitHub workflow automation |
 
 ### Tool Integrations (3)
 
@@ -154,11 +154,11 @@ Agent roles (coordinator, executor, validator) are defined in `skills/coordinati
 |------|---------|
 | **Playwright** | Browser automation for client-side testing via MCP |
 | **Kali Linux Tools** | nmap, masscan, nikto, gobuster, ffuf, sqlmap, testssl, and more |
-| **NVD / CVE Risk Score** | Auto-invoked CVE lookup (`/cve-risk-score`) — CVSS score, severity, CWE from NVD |
+| **NVD / CVE Risk Score** | Auto-invoked CVE lookup (`$cve-risk-score`) — CVSS score, severity, CWE from NVD |
 
 ### MCP Servers
 
-Local Model Context Protocol servers that expose Transilience APIs to MCP-capable clients (Claude Desktop, Cline, Zed, etc.). Each server is self-contained under `mcp/<name>/` with its own `pyproject.toml` and install instructions.
+Local Model Context Protocol servers expose Transilience APIs to MCP-capable clients. Codex reads the project-scoped configuration in `.codex/config.toml`; each server is self-contained under `mcp/<name>/` with its own `pyproject.toml` and install instructions.
 
 | Server | Purpose |
 |--------|---------|
@@ -170,9 +170,9 @@ Local Model Context Protocol servers that expose Transilience APIs to MCP-capabl
 
 The suite uses a **skills-only** architecture with canonical definitions at the repo root, symlinked into isolated project environments:
 
-- **Skills** (`skills/` at root, symlinked into each project's `.claude/skills/`) — User-triggered workflows invoked with `/skill-name`. Each skill contains a `SKILL.md` definition and `reference/` directory with attack techniques, cheat sheets, payloads, and agent role prompts.
-- **Coordination** (`skills/coordination/`) — Defines the 3 agent roles (coordinator, executor, validator) as a skill with role-based context injection. Read at runtime and passed to `Agent(prompt=...)`.
-- **Tools** (`tools/` at root, symlinked into each project's `.claude/tools/`) — Utility scripts for environment reading, integrations.
+- **Skills** (`skills/` at root, symlinked into `.agents/skills/`) — Codex-discoverable workflows. Each skill contains a `SKILL.md` definition and a `reference/` directory with attack techniques, cheat sheets, payloads, and role prompts.
+- **Coordination** (`skills/coordination/`) — Defines the coordinator, executor, skeptic, and validator contracts used by the custom agents in `.codex/agents/`.
+- **Tools** (`tools/` at root) — Utility scripts for environment reading, integrations, deterministic gates, and report generation.
 
 ### Multi-Agent Execution Flow
 
@@ -189,12 +189,12 @@ sequenceDiagram
     Coord->>Coord: Execute coordinator workflow inline
 
     Coord->>Roles: Read skills/coordination/reference/executor-role.md
-    Coord->>Agents: Agent(prompt=executor_role + chain + skills) × N
+    Coord->>Agents: Codex executor subagent(prompt + chain + skills) × N
     Note over Agents: SQL/XSS/SSRF/JWT/OAuth/SSTI/XXE...
     Agents-->>Output: findings/*.json + evidence/*.png
 
     Coord->>Roles: Read skills/coordination/reference/validator-role.md
-    Coord->>Agents: Agent(prompt=validator_role + evidence ONLY) × N
+    Coord->>Agents: Codex validator subagent(prompt + evidence ONLY) × N
     Note over Agents: Blind review — no attack chain context
     Agents-->>Output: validated/*.json
 
@@ -206,8 +206,11 @@ sequenceDiagram
 
 ```
 communitytools/
-├── CLAUDE.md                        # Project instructions
-├── marketplace.json                 # Machine-readable project manifest
+├── AGENTS.md                        # Codex project instructions
+├── .codex-plugin/plugin.json        # Codex plugin manifest
+├── .codex/config.toml               # Project MCP + subagent configuration
+├── .codex/agents/                    # Coordinator/executor/skeptic/validator agents
+├── .agents/skills/                   # Codex discovery links to canonical skills/
 ├── papers/                          # Research papers
 ├── benchmarks/                      # XBOW benchmark runner
 │
@@ -236,33 +239,27 @@ communitytools/
 │
 └── projects/                        # ← Isolated project environments
     └── pentest/
-        └── .claude/
-            ├── skills/              # Real directory, contents are symlinks
-            │   ├── injection/ → ../../../../skills/injection/
-            │   └── ...              # Each project picks what it needs
-            └── tools/               # Real directory, contents are symlinks
-                ├── env-reader.py → ../../../../tools/env-reader.py
-                └── ...
+        └── AGENTS.md                # Project-specific Codex instructions
 ```
 
 ### Why This Structure?
 
 **Canonical root directories** (`skills/`, `tools/`) hold the single source of truth for all definitions. No duplication, no drift.
 
-**Project directories** (`projects/`) are isolated environments designed to be run independently with `claude` from within the project folder. Each project has its own `.claude/` directory with real `skills/` and `tools/` folders — but the contents are **symlinks** pointing back to the canonical sources.
+**Project directories** (`projects/`) are isolated environments designed to be run independently with `codex` from within the project folder. Codex walks from the current directory to the repository root, loads layered `AGENTS.md` instructions, and discovers the root `.agents/skills/` links.
 
 This design gives you:
 
-- **Isolation** — Each project is a self-contained working directory. Run `claude` from `projects/pentest/` and it discovers only the skills that project has symlinked.
+- **Isolation** — Each project is a self-contained working directory. Run `codex` from `projects/pentest/` and it inherits the root and project-specific instructions.
 - **Single source of truth** — Edit a skill once in `skills/`, and every project that symlinks it gets the update immediately.
-- **Selective inclusion** — A new project doesn't need all 23 skills. Symlink only what's relevant.
-- **Claude Code compatibility** — Claude Code resolves symlinks transparently via the OS.
+- **Progressive disclosure** — Codex loads skill descriptions first and reads full `SKILL.md` files only when a workflow is selected.
+- **Codex compatibility** — Codex scans `.agents/skills/` and follows symlinked skill folders.
 
 **Adding a new project:**
 
 ```bash
-mkdir -p projects/myproject/.claude/{skills,tools}
-cd projects/myproject/.claude/skills
+mkdir -p projects/myproject/.agents/skills
+cd projects/myproject/.agents/skills
 
 # Symlink only the skills this project needs
 ln -s ../../../../skills/injection injection
@@ -271,9 +268,7 @@ ln -s ../../../../skills/coordination coordination
 ln -s ../../../../skills/reconnaissance reconnaissance
 # ... add more as needed
 
-# Same for tools
-cd ../tools
-ln -s ../../../../tools/env-reader.py env-reader.py
+# Keep reusable scripts in the repository-level tools/ directory.
 ```
 
 ---
@@ -285,8 +280,8 @@ We welcome contributions from the security community!
 **Read the full guide:** [CONTRIBUTING.md](CONTRIBUTING.md)
 
 **Quick path using Skill Update:**
-```bash
-/skill-update
+```text
+$skill-update
 # Select: CREATE → provide details → automated GitHub workflow
 # Handles: issue creation, branch, skill generation, validation, commit, PR
 ```
@@ -374,6 +369,6 @@ We build AI-driven cloud security and compliance automation. These open-source t
 
 [Website](https://www.transilience.ai) | [Issues](https://github.com/transilienceai/communitytools/issues) | [Discussions](https://github.com/transilienceai/communitytools/discussions)
 
-`claude-code` `ai-security` `penetration-testing` `bug-bounty` `owasp` `llm-security` `ai-threat-testing` `security-automation` `ethical-hacking` `cybersecurity` `appsec` `web-security` `hackerone` `hackthebox` `multi-agent`
+`codex` `ai-security` `penetration-testing` `bug-bounty` `owasp` `llm-security` `ai-threat-testing` `security-automation` `ethical-hacking` `cybersecurity` `appsec` `web-security` `hackerone` `hackthebox` `multi-agent`
 
 </div>

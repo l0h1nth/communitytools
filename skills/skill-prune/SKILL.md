@@ -1,11 +1,11 @@
 ---
 name: skill-prune
-description: Identify and remove negative-ROI skill content — orphan files, never-read entries, duplicates, content reintroducing challenge-specific lore. Inverse of /skill-update. Use during quarterly maintenance or after the linter flags issues.
+description: Identify and remove negative-ROI skill content — orphan files, never-read entries, duplicates, content reintroducing challenge-specific lore. Inverse of $skill-update. Use during quarterly maintenance or after the linter flags issues.
 ---
 
 # Skill Prune
 
-Inverse of `/skill-update`. Removes content rather than adding it. Run during quarterly maintenance, after engagements, or when `scripts/skill_linter.py` reports orphans / duplicates.
+Inverse of `$skill-update`. Removes content rather than adding it. Run during quarterly maintenance, after engagements, or when `scripts/skill_linter.py` reports orphans / duplicates.
 
 ## When to invoke
 
@@ -14,7 +14,7 @@ Inverse of `/skill-update`. Removes content rather than adding it. Run during qu
 - After a SKILL.md or reference file grows past its cap and needs trimming.
 - After a de-specialization sweep, to drop content tied to retired challenges.
 
-## Prune criteria (the four signals — same shape as /skill-update, inverted)
+## Prune criteria (the four signals — same shape as $skill-update, inverted)
 
 A reference / scenario / line is a **prune candidate** when it satisfies any of:
 

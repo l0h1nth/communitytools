@@ -8,7 +8,7 @@ description: Structured, named-question replacement for the ad-hoc senior-pentes
 
 **Capability status:** this page documents the catalogue described in PR #32. The cited catalogue YAML/runtime is not shipped in `communitytools` and could not be independently executed during current validation; see [`../IMPLEMENTATION_STATUS.md`](../IMPLEMENTATION_STATUS.md).
 
-**Reference implementation:** `.claude/semantic-checks/catalogue.yaml` + `fwrr.semantic.*` in [firewall-review](https://github.com/ipunithgowda/firewall-review)
+**Reference implementation:** `.codex/semantic-checks/catalogue.yaml` + `fwrr.semantic.*` in [firewall-review](https://github.com/ipunithgowda/firewall-review)
 **Catalogue version:** `1.0.0`
 **Output:** a `semantic-coverage.json` matrix per engagement (checks_run / pass / fail / cant_tell / not_applicable, per firewall)
 

@@ -6,7 +6,7 @@ type: process-pattern
 
 # Constant learning loop
 
-Every engagement produces **learning candidates** — patterns worth promoting into the shared skill catalogue so the next 1001 auditor runs inherit the improvement. Runs in `/report` phase 3 (after PDF + Excel render).
+Every engagement produces **learning candidates** — patterns worth promoting into the shared skill catalogue so the next 1001 auditor runs inherit the improvement. Runs in `report` phase 3 (after PDF + Excel render).
 
 ## What generates a candidate
 
@@ -31,7 +31,7 @@ The existing `scripts/propose-skills.py` surfaces candidates when **≥3 auditor
 - Framework version used is older than the NIST/PCI publication date by `>6 months` — cite-version update candidate
 - New framework control appears in ≥2 findings' external research (pentester notes) not in our catalog → catalog extension candidate
 
-## Candidate schema (`.claude/pending/<id>.yaml`)
+## Candidate schema (`.codex/pending/<id>.yaml`)
 
 ```yaml
 id: LC-2026-04-19-0001
@@ -54,22 +54,22 @@ curator_notes: ""
 
 ## Curator flow (existing slash commands)
 
-- `/pending list` — all open candidates
-- `/pending review <id>` — inspect one
-- `/pending promote <id>` — creates `learning/<id>` branch; curator applies the proposed skill change, adds golden tests, opens PR
-- `/pending reject <id>` with reason
-- `/pending hold <id>` — needs more data from future engagements
+- `pending list` — all open candidates
+- `pending review <id>` — inspect one
+- `pending promote <id>` — creates `learning/<id>` branch; curator applies the proposed skill change, adds golden tests, opens PR
+- `pending reject <id>` with reason
+- `pending hold <id>` — needs more data from future engagements
 
 ## Privacy guardrails
 
-Candidates MUST NOT leak client identifiers. Before writing `.claude/pending/<id>.yaml`:
+Candidates MUST NOT leak client identifiers. Before writing `.codex/pending/<id>.yaml`:
 - Replace client name → `sha256:<hash>` engagement ID
 - Replace device hostnames → `host_<n>` slot-ids
 - Replace IP addresses → RFC1918-safe placeholders (`10.x.y.z`, `172.16.x.y`)
 - Replace rule comments → `<redacted-comment>`
 - Keep: detector names, severity transitions, framework control IDs, vendor + OS version, pattern shapes
 
-Run `scripts/redact-pending.py` as a final pass before the candidate file hits `.claude/pending/`.
+Run `scripts/redact-pending.py` as a final pass before the candidate file hits `.codex/pending/`.
 
 ## Observability
 

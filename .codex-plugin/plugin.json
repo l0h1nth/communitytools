@@ -1,0 +1,36 @@
+{
+  "name": "transilience-community-security-tools",
+  "version": "1.0.0",
+  "description": "Codex skills for authorized security testing, bug bounty research, and defensive security assessment workflows.",
+  "author": {
+    "name": "Transilience AI",
+    "url": "https://github.com/transilienceai"
+  },
+  "homepage": "https://github.com/transilienceai/communitytools",
+  "repository": "https://github.com/transilienceai/communitytools",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "security",
+    "penetration-testing",
+    "bug-bounty",
+    "owasp",
+    "appsec"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Transilience Community Security Tools",
+    "shortDescription": "Authorized security testing workflows for Codex.",
+    "longDescription": "A reusable Codex skill library for scoped reconnaissance, vulnerability research, evidence validation, reporting, and security engineering.",
+    "developerName": "Transilience AI",
+    "category": "Security",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Run commands",
+      "Security research"
+    ],
+    "websiteURL": "https://www.transilience.ai",
+    "defaultPrompt": "Run an authorized, non-destructive security assessment using the appropriate Transilience skill."
+  }
+}

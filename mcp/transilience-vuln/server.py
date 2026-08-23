@@ -2,7 +2,7 @@
 Transilience Vulnerability MCP Server (local shim).
 
 Exposes Transilience's vulnerability enrichment REST API as MCP tools so that
-Claude Desktop can call them directly. The server runs locally on stdio,
+Codex or another MCP client can call them directly. The server runs locally on stdio,
 keeps the API key in an environment variable, enforces the 20/min free-tier
 rate limit, and caches responses on disk to avoid re-paying the quota cost
 on repeated calls.
@@ -66,9 +66,9 @@ log = logging.getLogger("transilience-mcp")
 if not API_KEY:
     log.error(
         "TRANSILIENCE_API_KEY environment variable is not set. "
-        "Set it in claude_desktop_config.json under env."
+        "Set it in the Codex process environment or MCP config."
     )
-    # Don't sys.exit — let the server start so Claude Desktop sees it,
+    # Don't sys.exit — let the server start so the MCP client sees it,
     # and surface the error on the first tool call.
 
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -158,7 +158,7 @@ async def fetch_cve_remote(cve_id: str) -> dict:
     if not API_KEY:
         raise RuntimeError(
             "TRANSILIENCE_API_KEY is not set. Add it to your "
-            "claude_desktop_config.json env block and restart Claude Desktop."
+            "Codex process environment or MCP config, then restart the client."
         )
 
     await limiter.acquire()

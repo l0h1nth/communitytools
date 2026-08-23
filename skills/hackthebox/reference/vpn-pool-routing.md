@@ -30,7 +30,7 @@ The principle is the same: each pool is a separate network.
 
 ```bash
 # 1. Get the lab the machine actually deploys to
-HTB_TOKEN=$(python3 .claude/tools/env-reader.py HTB_TOKEN | awk -F= '/^HTB_TOKEN=eyJ/{print $2}')
+HTB_TOKEN=$(python3 tools/env-reader.py HTB_TOKEN | awk -F= '/^HTB_TOKEN=eyJ/{print $2}')
 curl -s -H "Authorization: Bearer $HTB_TOKEN" \
   "https://labs.hackthebox.com/api/v4/machine/profile/<NAME>" \
   | python3 -c "import sys,re;t=sys.stdin.read();print('lab_server:',re.search(r'\"lab_server\":\"([^\"]+)\"',t).group(1) if re.search(r'\"lab_server\"',t) else 'NA');print('vpn_server_id:',re.search(r'\"vpn_server_id\":(\d+)',t).group(1) if re.search(r'\"vpn_server_id\"',t) else 'NA')"

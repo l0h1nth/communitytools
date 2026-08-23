@@ -1,12 +1,11 @@
 ---
 name: skill-update
 description: Skill creation, update and management — generates skill directory structure, validates against best practices, enforces line count limits. Use when creating, updating, or improving skills.
-model: opus
 ---
 
 # Skill Update
 
-Generate or refine Claude Code skills following Anthropic best practices.
+Generate or refine Codex skills following the Codex skill contract and repository conventions.
 
 ## Hard caps (enforced by `scripts/skill_linter.py`)
 
@@ -75,9 +74,9 @@ description: What it does AND when to use. Include trigger phrases.
 The procedure is a workflow — every step is code-enforced, so none can be skipped.
 
 ```
-Workflow('skill-update', { output_dir: 'projects/<engagement>' })   // harvest an engagement
-Workflow('skill-update', { learnings: [{ text, technique_type }] }) // judge a known set
-Workflow('skill-update', { mode: 'audit' })                         // read-only, writes nothing
+Use `$skill-update` with `output_dir: projects/<engagement>` to harvest an engagement.
+Use `$skill-update` with `learnings: [{ text, technique_type }]` to judge a known set.
+Use `$skill-update` with `mode: audit` for a read-only run.
 ```
 
 Add `dryRun: true` to see the write plan without writing. Parent-orchestrator only.
@@ -87,7 +86,7 @@ Judge (four gates + blind refuters) → Route (author the block) → Write (pers
 Sweep (confidentiality guard) → Verify (linter **delta**, not an absolute clean tree — the
 base carries pre-existing violations).
 
-Every promote/reject/write decision is pure JS in `.claude/workflows/lib/wf-helpers.mjs`
+Every promote/reject/write decision is pure JS in `workflows/lib/wf-helpers.mjs`
 (`promotionGate`, `capBudget`, `writeGate`, `lintDelta`, `skillUpdateGate`). No agent decides
 whether a learning is promoted or a write is allowed.
 

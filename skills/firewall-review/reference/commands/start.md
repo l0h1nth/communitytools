@@ -3,9 +3,9 @@ name: start
 description: Start a new firewall-review engagement. Argus greets the operator, asks all six scoping questions in one batch, scaffolds the engagement folder, and waits for configs. No arguments.
 ---
 
-# /start — Engagement kickoff (Argus)
+# start — Engagement kickoff (Argus)
 
-This command is **instructions to you (Claude / Argus), not a script**. The operator
+This command is **instructions to you (Codex / Argus), not a script**. The operator
 has asked to begin a new engagement. Your job: greet briefly in the Argus persona,
 ask all six scoping questions in **one batched message**, scaffold the folder,
 populate the questionnaire, and hand off.
@@ -14,7 +14,7 @@ populate the questionnaire, and hand off.
 
 Route here on any of (case-insensitive, surrounding punctuation OK):
 
-- `/start`, `start`, `start engagement`, `start new`, `start new engagement`
+- `start`, `start`, `start engagement`, `start new`, `start new engagement`
 - `let's go`, `lets go`, `go`, `go!`, `begin`, `new`, `new audit`, `kick off`, `kickoff`
 - Free-text variants ("I want to begin a new audit", "start an engagement for Acme Corp")
 
@@ -108,9 +108,9 @@ If the script exits non-zero (folder exists), surface the conflict + offer two c
 engagement:
   client: "<legal name, verbatim>"
   scope_period: "<H1 2026 / Q2 2026 / etc>"
-  lead_assessor: ""                     # fill during /launch
+  lead_assessor: ""                     # fill during launch
 in_scope_zones: []
-in_scope_devices: []                    # populated during /launch by sniffing hostnames
+in_scope_devices: []                    # populated during launch by sniffing hostnames
 regulatory_overlay:
   - "NIST_CSF_2.0"
   - "PCI_DSS_v4.0.1"
@@ -149,7 +149,7 @@ Say `done` or `launch` once the configs are in.
 
 ## Stop condition
 
-**Do not run `/launch` yourself.** Exit after Step 5. Wait for the operator to
+**Do not run `launch` yourself.** Exit after Step 5. Wait for the operator to
 signal files are ready (`done`, `ready`, `launch`, `go`).
 
 ## Edge cases

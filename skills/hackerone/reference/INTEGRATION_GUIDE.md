@@ -193,7 +193,7 @@ REDACTION_RULES = {
 ## References
 
 - `formats/sensitive-data-metadata.md`
-- `.claude/skills/hackerone/tools/sensitive_data_tracker.py`
+- `.agents/skills/hackerone/tools/sensitive_data_tracker.py`
 - GDPR: https://gdpr-info.eu/
 - CCPA: https://oag.ca.gov/privacy/ccpa
 - HackerOne: https://www.hackerone.com/
