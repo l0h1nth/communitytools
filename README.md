@@ -70,15 +70,15 @@ git clone https://github.com/transilienceai/communitytools.git
 cd communitytools/projects/pentest
 ```
 
-### 2. Open Codex and run skills
+### 2. Open Codex and run a skill
 
 ```bash
-codex     # Launch Codex from the projects/pentest directory
+codex     # Launch Codex from the current project directory
 ```
 
-Then select skills with `/skills` or mention them with `$`:
+Then browse skills with `/skills` or mention one explicitly with `$`:
 
-```
+```text
 Run an authorized pentest against https://target.com using $pentest-engagement
 $hackthebox                          # HackTheBox challenge automation
 $hackerone                           # Bug bounty workflow
@@ -86,6 +86,135 @@ $techstack-identification            # Passive tech stack recon
 $reconnaissance target.com           # Attack surface mapping
 $source-code-scanning ./app          # Static code analysis
 ```
+
+---
+
+## Using Codex Skills
+
+### How skill discovery works
+
+Codex reads the nearest `AGENTS.md` files before working. This repository provides:
+
+- `AGENTS.md` — repository-wide safety, scope, and workflow instructions.
+- `projects/*/AGENTS.md` — project-specific operating rules.
+- `.agents/skills/` — Codex discovery links.
+- `skills/` — the canonical skill source; edit this directory, not the symlinked mirror.
+- `.codex/agents/` — named coordinator, executor, skeptic, and validator agents.
+
+Start Codex from the repository root or from a project directory:
+
+```bash
+codex --cd projects/pentest
+```
+
+Codex walks from the Git root to the current directory, loads layered `AGENTS.md`
+files, and discovers the repository skills. Start a new Codex session after changing
+instructions or adding a skill.
+
+### Select the right skill
+
+Use `/skills` to browse available skills, or mention a skill explicitly:
+
+```text
+$reconnaissance example.com
+$api-security Review the authorized API surface in ./api/
+$source-code-scanning Audit ./src for security issues and dependency CVEs
+$cve-poc-generator Research CVE-YYYY-NNNN and produce a safe PoC report
+```
+
+For a complete authorized engagement, start with the orchestration skill:
+
+```text
+Use $pentest-engagement for this authorized scope.
+Read the scope file, create the required OUTPUT_DIR, and stop if authorization
+or the non-destructive rules are unclear.
+```
+
+Use the smallest relevant skill set. A skill's `SKILL.md` is the entry point; read
+the linked `reference/` files only when the selected workflow requires them.
+
+### Use the custom agents
+
+The coordination workflow uses the named agents in `.codex/agents/`. Ask Codex to
+delegate bounded work when the task benefits from independent context:
+
+```text
+Use $coordination for this authorized target.
+Delegate one coordinator per scope unit, keep executors bounded,
+and require a blind validator before accepting any finding.
+```
+
+The coordinator maintains engagement bookkeeping and delegates to:
+
+| Agent | Use |
+|-------|-----|
+| `coordinator` | Owns one target, scope, attack chain, and output directory |
+| `executor` | Performs one bounded reconnaissance or validation mission |
+| `skeptic` | Challenges the current theory without seeing private reasoning |
+| `validator` | Blindly verifies findings and evidence |
+
+### Use the local MCP server
+
+The optional Transilience vulnerability server is configured in
+`.codex/config.toml`. Install its dependencies, export the API key, then inspect
+the connection with `/mcp`:
+
+```bash
+cd mcp/transilience-vuln
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+cd ../..
+
+export TRANSILIENCE_API_KEY="your-key"
+codex
+```
+
+Ask Codex: `What MCP tools are available for CVE enrichment?`
+
+Keep credentials in environment variables. Do not place API keys in
+`AGENTS.md`, skill files, `.codex/config.toml`, or reports.
+
+### Create or update a skill
+
+Create the canonical skill directory and entry point:
+
+```text
+skills/my-skill/SKILL.md
+```
+
+The entry point must contain YAML frontmatter with `name` and `description`.
+Use `$skill-update` when creating or improving a skill:
+
+```text
+$skill-update
+Create a skill for <workflow>. Keep the entry point concise,
+link detailed material from reference/, and run the skill checks.
+```
+
+Validate the repository wiring after structural changes:
+
+```bash
+python3 scripts/test_codex_integration.py
+python3 scripts/test_skill_linter.py
+```
+
+### Troubleshooting
+
+- **Skill missing from `/skills`:** start Codex from this repository or a child
+  project directory, confirm `.agents/skills/<name>` points into `skills/<name>`,
+  and start a new session.
+- **Project rules missing:** run `codex --cd <project>` and check the nearest
+  `AGENTS.md`.
+- **MCP tools missing:** run `/mcp`, confirm dependencies are installed, and
+  verify `TRANSILIENCE_API_KEY` is exported before launching Codex.
+- **Delegation unavailable:** confirm the named files in `.codex/agents/` exist
+  and use a new Codex session after changing them.
+
+Official references: [Codex CLI](https://developers.openai.com/codex/cli/),
+[Skills](https://developers.openai.com/codex/skills/),
+[AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md), and
+[MCP](https://learn.chatgpt.com/docs/extend/mcp).
 
 ---
 
@@ -231,7 +360,7 @@ communitytools/
 │   │   └── reference/
 │   ├── reconnaissance/
 │   ├── server-side/
-│   └── ...                          # 27 skill directories total
+│   └── ...                          # 43 skill directories total
 │
 ├── tools/                           # ← Canonical tool integrations (source of truth)
 │   ├── env-reader.py
@@ -331,8 +460,8 @@ If you discover a vulnerability using these tools:
 
 | Category | Count |
 |----------|-------|
-| **Skills** | 27 |
-| **Role Prompts** | 3 (in coordination skill) |
+| **Skills** | 43 |
+| **Role Prompts** | 4 (coordinator, executor, skeptic, validator) |
 | **Tool Integrations** | 3 |
 | **Attack Types** | 53 |
 | **Reference Files** | 160+ |
